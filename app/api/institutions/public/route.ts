@@ -36,7 +36,7 @@ export async function GET() {
     if (error) {
       console.error('Error fetching institutions:', error);
       return NextResponse.json(
-        { error: 'Erro ao buscar instituições', details: error.message, code: error.code },
+        { error: 'Erro ao buscar instituições' },
         { status: 500 }
       );
     }
