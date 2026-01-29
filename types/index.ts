@@ -99,6 +99,7 @@ export interface OccurrenceType {
   category: string; // Tipo da ocorrencia (Atraso, Briga, etc.)
   severity: 'leve' | 'media' | 'grave';
   description?: string;
+  education_levels?: string[]; // Niveis de ensino (null = geral/todos)
   is_active: boolean;
   deleted_at?: string; // Soft delete
   created_at: string;

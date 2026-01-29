@@ -18,6 +18,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { createClient } from '@/lib/supabase/client';
 import { getFromStorage, removeFromStorage } from '@/lib/utils';
 import { OCCURRENCE_SEVERITIES, type User, type Institution, type OccurrenceType } from '@/types';
+import { EDUCATION_LEVELS, type EducationStage } from '@/lib/constants/education';
 
 export default function TiposOcorrenciasPage() {
   const router = useRouter();
@@ -28,6 +29,7 @@ export default function TiposOcorrenciasPage() {
   // Data
   const [occurrenceTypes, setOccurrenceTypes] = useState<OccurrenceType[]>([]);
   const [loadingTypes, setLoadingTypes] = useState(false);
+  const [institutionLevels, setInstitutionLevels] = useState<EducationStage[]>([]);
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
@@ -39,6 +41,7 @@ export default function TiposOcorrenciasPage() {
     category: '',
     severity: 'leve' as OccurrenceType['severity'],
     description: '',
+    education_levels: [] as string[],
   });
 
   useEffect(() => {
@@ -54,7 +57,10 @@ export default function TiposOcorrenciasPage() {
 
       setCurrentUser(user);
       setCurrentInstitution(institution);
-      await loadOccurrenceTypes(institution.id);
+      await Promise.all([
+        loadOccurrenceTypes(institution.id),
+        loadInstitutionLevels(institution.id),
+      ]);
       setIsLoading(false);
     };
 
@@ -82,6 +88,23 @@ export default function TiposOcorrenciasPage() {
     }
   };
 
+  const loadInstitutionLevels = async (institutionId: string) => {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('classes')
+        .select('education_level')
+        .eq('institution_id', institutionId)
+        .eq('is_active', true)
+        .is('deleted_at', null);
+
+      const unique = Array.from(new Set((data || []).map((c: { education_level: string }) => c.education_level).filter(Boolean))) as EducationStage[];
+      setInstitutionLevels(unique);
+    } catch (error) {
+      console.error('Error loading institution levels:', error);
+    }
+  };
+
   const handleOpenModal = (type?: OccurrenceType) => {
     if (type) {
       setEditingType(type);
@@ -89,6 +112,7 @@ export default function TiposOcorrenciasPage() {
         category: type.category,
         severity: type.severity,
         description: type.description || '',
+        education_levels: type.education_levels || [],
       });
     } else {
       setEditingType(null);
@@ -96,6 +120,7 @@ export default function TiposOcorrenciasPage() {
         category: '',
         severity: 'leve',
         description: '',
+        education_levels: [],
       });
     }
     setShowModal(true);
@@ -115,6 +140,7 @@ export default function TiposOcorrenciasPage() {
         category: formData.category.trim(),
         severity: formData.severity,
         description: formData.description || null,
+        education_levels: formData.education_levels.length > 0 ? formData.education_levels : null,
         institution_id: currentInstitution?.id,
         is_active: true,
       };
@@ -242,6 +268,7 @@ export default function TiposOcorrenciasPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nome</TableHead>
+                      <TableHead>Níveis</TableHead>
                       <TableHead>Severidade</TableHead>
                       <TableHead>Ações</TableHead>
                     </TableRow>
@@ -256,6 +283,19 @@ export default function TiposOcorrenciasPage() {
                               <p className="text-sm text-muted-foreground">{type.description}</p>
                             )}
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          {type.education_levels && type.education_levels.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {type.education_levels.map(level => (
+                                <Badge key={level} variant="secondary">
+                                  {EDUCATION_LEVELS[level as EducationStage]?.label || level}
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <Badge variant="default">Geral</Badge>
+                          )}
                         </TableCell>
                         <TableCell>{getSeverityBadge(type.severity)}</TableCell>
                         <TableCell>
@@ -325,6 +365,40 @@ export default function TiposOcorrenciasPage() {
               placeholder="Descrição detalhada do tipo de ocorrência..."
               rows={3}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Níveis de Ensino</Label>
+            <p className="text-xs text-muted-foreground">
+              Deixe vazio para disponibilizar em todos os níveis (Geral)
+            </p>
+            <div className="space-y-2 p-3 border rounded-md">
+              {institutionLevels.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhuma turma cadastrada na instituição</p>
+              ) : (
+                institutionLevels.map(level => {
+                  const checked = formData.education_levels.includes(level);
+                  return (
+                    <label key={level} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            education_levels: checked
+                              ? prev.education_levels.filter(l => l !== level)
+                              : [...prev.education_levels, level],
+                          }));
+                        }}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-sm">{EDUCATION_LEVELS[level]?.label || level}</span>
+                    </label>
+                  );
+                })
+              )}
+            </div>
           </div>
 
           <ModalFooter>

@@ -94,6 +94,16 @@ export default function RegistrarOcorrenciaPage() {
   const handleClassChange = (classId: string) => {
     setSelectedClass(classId);
     setSelectedStudents([]);
+    // Clear type if incompatible with new class
+    if (selectedType) {
+      const newClass = classes.find(c => c.id === classId);
+      const currentType = occurrenceTypes.find(t => t.id === selectedType);
+      if (newClass && currentType?.education_levels && currentType.education_levels.length > 0) {
+        if (!currentType.education_levels.includes(newClass.education_level)) {
+          setSelectedType('');
+        }
+      }
+    }
     if (classId) {
       loadStudents(classId);
     } else {
@@ -311,7 +321,14 @@ export default function RegistrarOcorrenciaPage() {
                   onChange={(e) => setSelectedType(e.target.value)}
                 >
                   <option value="">Selecione...</option>
-                  {occurrenceTypes.map((type) => (
+                  {occurrenceTypes
+                    .filter(type => {
+                      if (!type.education_levels || type.education_levels.length === 0) return true;
+                      if (!selectedClass) return true;
+                      const cls = classes.find(c => c.id === selectedClass);
+                      return cls ? type.education_levels.includes(cls.education_level) : true;
+                    })
+                    .map((type) => (
                     <option key={type.id} value={type.id}>
                       {type.category} ({type.severity})
                     </option>

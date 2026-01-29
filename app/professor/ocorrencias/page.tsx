@@ -20,7 +20,7 @@ import { getFromStorage, removeFromStorage, formatDateTime, createBrazilDateTime
 import type { User, Institution, Class, Occurrence, OccurrenceType } from '@/types';
 
 interface OccurrenceWithRelations extends Omit<Occurrence, 'student' | 'occurrence_type'> {
-  student?: { full_name: string; class?: { name: string } };
+  student?: { full_name: string; class?: { name: string; education_level?: string } };
   occurrence_type?: { category: string; severity: string };
 }
 
@@ -119,7 +119,7 @@ export default function MinhasOcorrenciasPage() {
         .from('occurrences')
         .select(`
           *,
-          student:students(full_name, class:classes(name)),
+          student:students(full_name, class:classes(name, education_level)),
           occurrence_type:occurrence_types(category, severity)
         `)
         .eq('institution_id', institutionId)
@@ -435,7 +435,13 @@ export default function MinhasOcorrenciasPage() {
                 onChange={(e) => setEditForm({ ...editForm, occurrence_type_id: e.target.value })}
               >
                 <option value="">Selecione o tipo</option>
-                {occurrenceTypes.map((type) => (
+                {occurrenceTypes
+                  .filter(type => {
+                    if (!type.education_levels || type.education_levels.length === 0) return true;
+                    const level = editingOccurrence?.student?.class?.education_level;
+                    return level ? type.education_levels.includes(level) : true;
+                  })
+                  .map((type) => (
                   <option key={type.id} value={type.id}>
                     {type.category} ({type.severity})
                   </option>
