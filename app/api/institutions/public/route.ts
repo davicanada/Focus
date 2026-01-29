@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +25,11 @@ interface PublicInstitution {
  */
 export async function GET() {
   try {
-    const supabase = createServiceClient();
+    // Use anon key client — public RLS policy "Anyone can read active institutions" allows this
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
 
     const { data, error } = await supabase
       .from('institutions')
