@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 // API para limpar TODOS os dados do banco (exceto master user)
 // CUIDADO: Esta operacao e irreversivel!
 

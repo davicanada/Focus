@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 // Address columns for institutions table
 const INSTITUTIONS_ADDRESS_COLUMNS = [
   'full_address',

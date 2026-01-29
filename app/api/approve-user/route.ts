@@ -3,6 +3,8 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { generateSlug } from '@/lib/utils';
 import { sendWelcomeEmail } from '@/lib/email/sendVerificationEmail';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

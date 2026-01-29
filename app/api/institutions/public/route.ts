@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 // Interface pública - apenas campos necessários para o select
 interface PublicInstitution {
   id: string;

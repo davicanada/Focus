@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 // ============================================
 // COLEGIO ESTADUAL PROFESSOR CARLOS DRUMMOND DE ANDRADE
 // Belo Horizonte, MG - Inicio das aulas: 5 de Janeiro de 2026

@@ -3,6 +3,8 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { generateSlug } from '@/lib/utils';
 import { sendWelcomeEmail } from '@/lib/email/sendVerificationEmail';
 
+export const dynamic = 'force-dynamic';
+
 interface ApprovalResult {
   request_id: string;
   success: boolean;

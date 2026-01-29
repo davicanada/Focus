@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { sendWelcomeEmail } from '@/lib/email/sendVerificationEmail';
 
+export const dynamic = 'force-dynamic';
+
 // GET - Listar usuários de uma instituição (professores ou todos)
 export async function GET(request: NextRequest) {
   try {
