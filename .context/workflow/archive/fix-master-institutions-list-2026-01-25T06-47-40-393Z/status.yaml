@@ -1,0 +1,41 @@
+project:
+  name: "fix-master-institutions-list"
+  scale: SMALL
+  started: "2026-01-25T06:16:55.203Z"
+  current_phase: V
+
+phases:
+  P:
+    status: filled
+    started_at: "2026-01-25T06:16:55.203Z"
+    completed_at: "2026-01-25T06:22:41.017Z"
+  R:
+    status: skipped
+    reason: "Not required for scale SMALL"
+  E:
+    status: filled
+    started_at: "2026-01-25T06:22:41.019Z"
+    completed_at: "2026-01-25T06:23:00.276Z"
+  V:
+    status: completed
+    started_at: "2026-01-25T06:23:00.279Z"
+    completed_at: "2026-01-25T06:23:06.468Z"
+    outputs:
+      - path: "CLAUDE.md"
+        status: filled
+  C:
+    status: skipped
+    reason: "Not required for scale SMALL"
+
+execution:
+  history:
+    - timestamp: "2026-01-25T06:23:06.468Z"
+      phase: V
+      action: completed
+  last_activity: "2026-01-25T06:23:06.468Z"
+  resume_context: "Fase V (Validação) concluída"
+
+approval:
+  plan_created: true
+  plan_approved: false
+

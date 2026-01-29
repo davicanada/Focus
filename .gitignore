@@ -34,3 +34,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# playwright
+/playwright-report/
+/test-results/
+
+# dev scripts & artifacts
+test-gemini-key.mjs
+list-models.mjs
+nul
+.mcp.json
+
+# screenshots
+New-Analytics-Tab.png
+posicao_correta_logo.png

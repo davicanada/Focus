@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "ai-analytics-improvements-v2",
+      "path": "plans/ai-analytics-improvements-v2.md",
+      "title": "Melhorias AI Analytics v2",
+      "summary": "Corrigir queries complexas, formatacao markdown, remover filtro de periodos e adicionar multi-selecao com Ctrl",
+      "linkedAt": "2026-01-23T23:10:50.180Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "ai-analytics-improvements-v2"
+}

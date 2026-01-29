@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "validacao-fluxo-usuarios",
+      "path": "plans/validacao-fluxo-usuarios.md",
+      "title": "Validacao do Fluxo de Confirmacao de Usuarios e Instituicoes",
+      "summary": "Validar e testar o fluxo completo de solicitacao de acesso, aprovacao de usuarios, criacao de instituicoes e envio de emails",
+      "linkedAt": "2026-01-24T05:03:24.392Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "validacao-fluxo-usuarios"
+}

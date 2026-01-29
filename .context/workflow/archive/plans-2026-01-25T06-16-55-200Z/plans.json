@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "student-selection-improvement",
+      "path": "plans/student-selection-improvement.md",
+      "title": "Melhorar Selecao de Alunos nas Ocorrencias",
+      "summary": "Alterar UX de selecao de alunos para mostrar todos da turma com checkboxes, em vez de busca por nome",
+      "linkedAt": "2026-01-25T05:57:38.342Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "student-selection-improvement"
+}

@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "fix-access-request-state-field",
+      "path": "plans/fix-access-request-state-field.md",
+      "title": "Corrigir Erro 500 no Access Request - Campo State",
+      "summary": "Corrigir o bug onde o campo institution_state esta recebendo nome completo do estado em vez da sigla",
+      "linkedAt": "2026-01-24T06:25:10.486Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "fix-access-request-state-field"
+}

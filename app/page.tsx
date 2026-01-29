@@ -1,101 +1,162 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { FocusLogo } from '@/components/FocusLogo';
+import { LoginForm } from '@/components/auth/LoginForm';
+import { AccessRequestModal } from '@/components/auth/AccessRequestModal';
+import { ForgotPasswordModal } from '@/components/auth/ForgotPasswordModal';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/client';
+import { getFromStorage } from '@/lib/utils';
+
+export default function HomePage() {
+  const router = useRouter();
+  const [showAccessRequest, setShowAccessRequest] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+
+  // Check if user is already logged in (non-blocking - form renders immediately)
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        // Primeiro verifica localStorage (instantaneo)
+        const currentRole = getFromStorage('currentRole', null);
+        if (currentRole) {
+          // Redireciona imediatamente baseado no role salvo
+          if (currentRole === 'master') {
+            router.push('/master');
+            return;
+          } else if (currentRole === 'admin') {
+            router.push('/admin');
+            return;
+          } else if (currentRole === 'admin_viewer') {
+            router.push('/viewer');
+            return;
+          } else if (currentRole === 'professor') {
+            router.push('/professor');
+            return;
+          }
+        }
+
+        // Verifica sessao Supabase em background (nao bloqueia UI)
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session && currentRole) {
+          // Sessao existe e tem role - redireciona
+          if (currentRole === 'master') {
+            router.push('/master');
+          } else if (currentRole === 'admin') {
+            router.push('/admin');
+          } else if (currentRole === 'admin_viewer') {
+            router.push('/viewer');
+          } else if (currentRole === 'professor') {
+            router.push('/professor');
+          }
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="min-h-screen flex">
+      {/* Left side - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-primary items-center justify-center p-12">
+        <div className="max-w-md text-center text-primary-foreground">
+          {/* Logo e títulos */}
+          <div className="flex flex-col items-center mb-8">
+            {/* Focus com logo posicionada à esquerda */}
+            <div className="relative">
+              <FocusLogo variant="white" size="lg" showText={false} className="absolute -left-16 top-1/2 -translate-y-1/2" />
+              <span className="text-4xl font-bold">Focus</span>
+            </div>
+            {/* Sistema de Gestão Escolar abaixo, centralizado */}
+            <span className="text-4xl font-bold">Sistema de Gestão Escolar</span>
+          </div>
+          <p className="text-lg text-primary-foreground/80">
+            Gerencie ocorrências disciplinares, pedagógicas e administrativas
+            de forma eficiente e organizada.
+          </p>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          <div className="mt-12 grid grid-cols-2 gap-6 text-left">
+            <div className="bg-white/10 rounded-lg p-4">
+              <h3 className="font-semibold mb-2">Multi-Tenant</h3>
+              <p className="text-sm text-primary-foreground/70">
+                Cada instituição com seus próprios dados isolados
+              </p>
+            </div>
+            <div className="bg-white/10 rounded-lg p-4">
+              <h3 className="font-semibold mb-2">Rastreamento</h3>
+              <p className="text-sm text-primary-foreground/70">
+                Histórico completo de ocorrências por aluno
+              </p>
+            </div>
+            <div className="bg-white/10 rounded-lg p-4">
+              <h3 className="font-semibold mb-2">Relatórios</h3>
+              <p className="text-sm text-primary-foreground/70">
+                Exportação em PDF e Excel com filtros avançados
+              </p>
+            </div>
+            <div className="bg-white/10 rounded-lg p-4">
+              <h3 className="font-semibold mb-2">Analytics</h3>
+              <p className="text-sm text-primary-foreground/70">
+                Dashboards e gráficos para análise de dados
+              </p>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      {/* Right side - Login */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-muted/30">
+        <div className="w-full max-w-md">
+          {/* Mobile logo */}
+          <div className="lg:hidden mb-8">
+            <div className="flex flex-col items-center">
+              {/* Focus com logo posicionada à esquerda */}
+              <div className="relative">
+                <FocusLogo size="md" showText={false} className="absolute -left-12 top-1/2 -translate-y-1/2" />
+                <span className="text-2xl font-bold text-[#2d3a5f]">Focus</span>
+              </div>
+              {/* Sistema de Gestão Escolar abaixo */}
+              <span className="text-sm text-muted-foreground">Sistema de Gestão Escolar</span>
+            </div>
+          </div>
+
+          <Card>
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl">Entrar</CardTitle>
+              <CardDescription>
+                Entre com seu email e senha para acessar o sistema
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <LoginForm
+                onAccessRequest={() => setShowAccessRequest(true)}
+                onForgotPassword={() => setShowForgotPassword(true)}
+              />
+            </CardContent>
+          </Card>
+
+
+        </div>
+      </div>
+
+      {/* Access Request Modal */}
+      <AccessRequestModal
+        isOpen={showAccessRequest}
+        onClose={() => setShowAccessRequest(false)}
+      />
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+      />
     </div>
   );
 }

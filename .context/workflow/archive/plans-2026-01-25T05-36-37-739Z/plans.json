@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "professor-edit-occurrences",
+      "path": "plans/professor-edit-occurrences.md",
+      "title": "Edição de Ocorrências pelo Professor",
+      "summary": "Permitir que professores editem ocorrências que já registraram para corrigir erros",
+      "linkedAt": "2026-01-25T05:01:55.714Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "professor-edit-occurrences"
+}

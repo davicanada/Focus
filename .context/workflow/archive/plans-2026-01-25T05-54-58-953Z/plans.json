@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "professor-occurrence-time",
+      "path": "plans/professor-occurrence-time.md",
+      "title": "Adicionar Hora nas Ocorrencias",
+      "summary": "Permitir professor selecionar hora da ocorrencia ao registrar e editar",
+      "linkedAt": "2026-01-25T05:38:24.111Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "professor-occurrence-time"
+}

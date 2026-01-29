@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "fix-master-institutions-list",
+      "path": "plans/fix-master-institutions-list.md",
+      "title": "Corrigir Listagem de Instituicoes no Painel Master",
+      "summary": "RLS bloqueia leitura de instituicoes pelo master - criar API route com service client",
+      "linkedAt": "2026-01-25T06:19:13.449Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "fix-master-institutions-list"
+}

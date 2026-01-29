@@ -1,0 +1,1342 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-01-23T01:05:06.445Z",
+  "stack": {
+    "primaryLanguage": "typescript",
+    "languages": [
+      "javascript",
+      "typescript"
+    ],
+    "frameworks": [
+      "nextjs"
+    ],
+    "buildTools": [],
+    "testFrameworks": [],
+    "packageManager": "npm",
+    "isMonorepo": false,
+    "hasDocker": false,
+    "hasCI": false
+  },
+  "structure": {
+    "totalFiles": 76,
+    "topDirectories": [
+      {
+        "name": "app",
+        "fileCount": 29
+      },
+      {
+        "name": "CLAUDE.md",
+        "fileCount": 1
+      },
+      {
+        "name": "components",
+        "fileCount": 25
+      },
+      {
+        "name": "emails",
+        "fileCount": 1
+      },
+      {
+        "name": "lib",
+        "fileCount": 5
+      },
+      {
+        "name": "next-env.d.ts",
+        "fileCount": 1
+      },
+      {
+        "name": "next.config.mjs",
+        "fileCount": 1
+      },
+      {
+        "name": "package-lock.json",
+        "fileCount": 1
+      },
+      {
+        "name": "package.json",
+        "fileCount": 1
+      },
+      {
+        "name": "postcss.config.mjs",
+        "fileCount": 1
+      },
+      {
+        "name": "README.md",
+        "fileCount": 1
+      },
+      {
+        "name": "supabase-add-shift-column.sql",
+        "fileCount": 1
+      },
+      {
+        "name": "supabase-dummy-data.sql",
+        "fileCount": 1
+      },
+      {
+        "name": "supabase-fix-rls-circular.sql",
+        "fileCount": 1
+      },
+      {
+        "name": "supabase-fix-rls.sql",
+        "fileCount": 1
+      },
+      {
+        "name": "supabase-migration-address.sql",
+        "fileCount": 1
+      },
+      {
+        "name": "supabase-schema.sql",
+        "fileCount": 1
+      },
+      {
+        "name": "tailwind.config.ts",
+        "fileCount": 1
+      },
+      {
+        "name": "tsconfig.json",
+        "fileCount": 1
+      },
+      {
+        "name": "types",
+        "fileCount": 1
+      }
+    ],
+    "languageDistribution": [
+      {
+        "extension": ".tsx",
+        "count": 42
+      },
+      {
+        "extension": ".ts",
+        "count": 17
+      },
+      {
+        "extension": ".sql",
+        "count": 6
+      },
+      {
+        "extension": ".json",
+        "count": 3
+      },
+      {
+        "extension": ".md",
+        "count": 2
+      },
+      {
+        "extension": ".mjs",
+        "count": 2
+      },
+      {
+        "extension": ".woff",
+        "count": 2
+      },
+      {
+        "extension": ".svg",
+        "count": 1
+      },
+      {
+        "extension": ".css",
+        "count": 1
+      }
+    ]
+  },
+  "architecture": {
+    "layers": [
+      {
+        "name": "Utils",
+        "description": "Shared utilities and helpers",
+        "directories": [
+          "lib",
+          "lib\\supabase",
+          "lib\\email",
+          "lib\\constants"
+        ],
+        "symbolCount": 34,
+        "dependsOn": []
+      },
+      {
+        "name": "Controllers",
+        "description": "Request handling and routing",
+        "directories": [
+          "app\\api\\setup",
+          "app\\api\\approve-user",
+          "app\\api\\access-request",
+          "app\\api\\user\\toggle-status",
+          "app\\api\\user\\settings",
+          "app\\api\\user\\edit",
+          "app\\api\\setup\\seed",
+          "app\\api\\setup\\reset-password",
+          "app\\api\\setup\\check-user"
+        ],
+        "symbolCount": 17,
+        "dependsOn": []
+      },
+      {
+        "name": "Components",
+        "description": "UI components and views",
+        "directories": [
+          "components",
+          "app",
+          "components\\ui",
+          "components\\dashboard",
+          "components\\layout",
+          "components\\auth",
+          "app\\settings",
+          "app\\professor",
+          "app\\master",
+          "app\\admin",
+          "app\\professor\\registrar",
+          "app\\professor\\ocorrencias",
+          "app\\admin\\turmas",
+          "app\\admin\\trimestres",
+          "app\\admin\\tipos-ocorrencias",
+          "app\\admin\\relatorios",
+          "app\\admin\\professores",
+          "app\\admin\\dashboard",
+          "app\\admin\\alunos",
+          "app\\admin\\relatorios\\gerar"
+        ],
+        "symbolCount": 54,
+        "dependsOn": []
+      }
+    ],
+    "patterns": [],
+    "entryPoints": [
+      "types\\index.ts",
+      "lib\\supabase\\server.ts"
+    ]
+  },
+  "symbols": {
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "AccessRequest",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 125,
+        "exported": true
+      },
+      {
+        "name": "AccessRequestFormData",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 172,
+        "exported": true
+      },
+      {
+        "name": "AddressData",
+        "kind": "interface",
+        "file": "components\\ui\\address-autocomplete.tsx",
+        "line": 7,
+        "exported": true
+      },
+      {
+        "name": "AuthContext",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 222,
+        "exported": true
+      },
+      {
+        "name": "BadgeProps",
+        "kind": "interface",
+        "file": "components\\ui\\badge.tsx",
+        "line": 26,
+        "exported": true
+      },
+      {
+        "name": "ButtonProps",
+        "kind": "interface",
+        "file": "components\\ui\\button.tsx",
+        "line": 35,
+        "exported": true
+      },
+      {
+        "name": "CheckboxProps",
+        "kind": "interface",
+        "file": "components\\ui\\checkbox.tsx",
+        "line": 7,
+        "exported": true
+      },
+      {
+        "name": "Class",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 51,
+        "exported": true
+      },
+      {
+        "name": "ClassFormData",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 205,
+        "exported": true
+      },
+      {
+        "name": "DashboardStats",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 235,
+        "exported": true
+      },
+      {
+        "name": "EducationLevel",
+        "kind": "interface",
+        "file": "lib\\constants\\education.ts",
+        "line": 9,
+        "exported": true
+      },
+      {
+        "name": "EducationYear",
+        "kind": "interface",
+        "file": "lib\\constants\\education.ts",
+        "line": 3,
+        "exported": true
+      },
+      {
+        "name": "InputProps",
+        "kind": "interface",
+        "file": "components\\ui\\input.tsx",
+        "line": 6,
+        "exported": true
+      },
+      {
+        "name": "Institution",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 11,
+        "exported": true
+      },
+      {
+        "name": "LabelProps",
+        "kind": "interface",
+        "file": "components\\ui\\label.tsx",
+        "line": 11,
+        "exported": true
+      },
+      {
+        "name": "LoginFormData",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 167,
+        "exported": true
+      },
+      {
+        "name": "Occurrence",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 98,
+        "exported": true
+      },
+      {
+        "name": "OccurrenceFormData",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 214,
+        "exported": true
+      },
+      {
+        "name": "OccurrenceType",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 85,
+        "exported": true
+      },
+      {
+        "name": "Quarter",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 114,
+        "exported": true
+      },
+      {
+        "name": "SelectProps",
+        "kind": "interface",
+        "file": "components\\ui\\select.tsx",
+        "line": 7,
+        "exported": true
+      },
+      {
+        "name": "Student",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 66,
+        "exported": true
+      },
+      {
+        "name": "StudentFormData",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 194,
+        "exported": true
+      },
+      {
+        "name": "SystemLog",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 153,
+        "exported": true
+      },
+      {
+        "name": "TextareaProps",
+        "kind": "interface",
+        "file": "components\\ui\\textarea.tsx",
+        "line": 6,
+        "exported": true
+      },
+      {
+        "name": "User",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 32,
+        "exported": true
+      },
+      {
+        "name": "UserInstitution",
+        "kind": "interface",
+        "file": "types\\index.ts",
+        "line": 42,
+        "exported": true
+      },
+      {
+        "name": "AccessRequestModalProps",
+        "kind": "interface",
+        "file": "components\\auth\\AccessRequestModal.tsx",
+        "line": 17,
+        "exported": false
+      },
+      {
+        "name": "AccessRequestWithInstitution",
+        "kind": "interface",
+        "file": "app\\master\\page.tsx",
+        "line": 39,
+        "exported": false
+      },
+      {
+        "name": "AddressAutocompleteProps",
+        "kind": "interface",
+        "file": "components\\ui\\address-autocomplete.tsx",
+        "line": 22,
+        "exported": false
+      },
+      {
+        "name": "DashboardLayoutProps",
+        "kind": "interface",
+        "file": "components\\layout\\DashboardLayout.tsx",
+        "line": 7,
+        "exported": false
+      },
+      {
+        "name": "FilterState",
+        "kind": "interface",
+        "file": "app\\admin\\dashboard\\page.tsx",
+        "line": 19,
+        "exported": false
+      },
+      {
+        "name": "FocusLogoProps",
+        "kind": "interface",
+        "file": "components\\FocusLogo.tsx",
+        "line": 5,
+        "exported": false
+      },
+      {
+        "name": "LoginFormProps",
+        "kind": "interface",
+        "file": "components\\auth\\LoginForm.tsx",
+        "line": 15,
+        "exported": false
+      },
+      {
+        "name": "MigrationResult",
+        "kind": "interface",
+        "file": "app\\api\\setup\\route.ts",
+        "line": 77,
+        "exported": false
+      },
+      {
+        "name": "ModalProps",
+        "kind": "interface",
+        "file": "components\\ui\\modal.tsx",
+        "line": 7,
+        "exported": false
+      },
+      {
+        "name": "NavItem",
+        "kind": "interface",
+        "file": "components\\layout\\Sidebar.tsx",
+        "line": 30,
+        "exported": false
+      },
+      {
+        "name": "OccurrenceWithRelations",
+        "kind": "interface",
+        "file": "app\\professor\\ocorrencias\\page.tsx",
+        "line": 19,
+        "exported": false
+      },
+      {
+        "name": "ProgressLinkProps",
+        "kind": "interface",
+        "file": "components\\ProgressLink.tsx",
+        "line": 8,
+        "exported": false
+      },
+      {
+        "name": "QuickActionCardProps",
+        "kind": "interface",
+        "file": "components\\dashboard\\QuickActionCard.tsx",
+        "line": 7,
+        "exported": false
+      },
+      {
+        "name": "SendEmailOptions",
+        "kind": "interface",
+        "file": "lib\\email\\sendVerificationEmail.ts",
+        "line": 9,
+        "exported": false
+      },
+      {
+        "name": "SidebarProps",
+        "kind": "interface",
+        "file": "components\\layout\\Sidebar.tsx",
+        "line": 25,
+        "exported": false
+      },
+      {
+        "name": "SpinnerProps",
+        "kind": "interface",
+        "file": "components\\ui\\spinner.tsx",
+        "line": 6,
+        "exported": false
+      },
+      {
+        "name": "StatCardProps",
+        "kind": "interface",
+        "file": "components\\dashboard\\StatCard.tsx",
+        "line": 6,
+        "exported": false
+      },
+      {
+        "name": "TabsContentProps",
+        "kind": "interface",
+        "file": "components\\ui\\tabs.tsx",
+        "line": 98,
+        "exported": false
+      },
+      {
+        "name": "TabsContextValue",
+        "kind": "interface",
+        "file": "components\\ui\\tabs.tsx",
+        "line": 6,
+        "exported": false
+      },
+      {
+        "name": "TabsListProps",
+        "kind": "interface",
+        "file": "components\\ui\\tabs.tsx",
+        "line": 51,
+        "exported": false
+      },
+      {
+        "name": "TabsProps",
+        "kind": "interface",
+        "file": "components\\ui\\tabs.tsx",
+        "line": 21,
+        "exported": false
+      },
+      {
+        "name": "TabsTriggerProps",
+        "kind": "interface",
+        "file": "components\\ui\\tabs.tsx",
+        "line": 69,
+        "exported": false
+      },
+      {
+        "name": "TeacherWithUser",
+        "kind": "interface",
+        "file": "app\\admin\\professores\\page.tsx",
+        "line": 17,
+        "exported": false
+      }
+    ],
+    "functions": [
+      {
+        "name": "AlunosPage",
+        "kind": "function",
+        "file": "app\\admin\\alunos\\page.tsx",
+        "line": 32,
+        "exported": true
+      },
+      {
+        "name": "buildClassLabel",
+        "kind": "function",
+        "file": "lib\\constants\\education.ts",
+        "line": 71,
+        "exported": true
+      },
+      {
+        "name": "canHaveSection",
+        "kind": "function",
+        "file": "lib\\constants\\education.ts",
+        "line": 67,
+        "exported": true
+      },
+      {
+        "name": "capitalize",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 56,
+        "exported": true
+      },
+      {
+        "name": "cn",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "createClient",
+        "kind": "function",
+        "file": "lib\\supabase\\server.ts",
+        "line": 4,
+        "exported": true
+      },
+      {
+        "name": "createClient",
+        "kind": "function",
+        "file": "lib\\supabase\\client.ts",
+        "line": 3,
+        "exported": true
+      },
+      {
+        "name": "createServiceClient",
+        "kind": "function",
+        "file": "lib\\supabase\\server.ts",
+        "line": 30,
+        "exported": true
+      },
+      {
+        "name": "DashboardLayout",
+        "kind": "function",
+        "file": "components\\layout\\DashboardLayout.tsx",
+        "line": 19,
+        "exported": true
+      },
+      {
+        "name": "debounce",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 167,
+        "exported": true
+      },
+      {
+        "name": "delay",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 162,
+        "exported": true
+      },
+      {
+        "name": "formatDate",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 10,
+        "exported": true
+      },
+      {
+        "name": "formatDateForInput",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 32,
+        "exported": true
+      },
+      {
+        "name": "formatDateTime",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 20,
+        "exported": true
+      },
+      {
+        "name": "formatPhone",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 71,
+        "exported": true
+      },
+      {
+        "name": "generateSlug",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 46,
+        "exported": true
+      },
+      {
+        "name": "GET",
+        "kind": "function",
+        "file": "app\\api\\setup\\route.ts",
+        "line": 323,
+        "exported": true
+      },
+      {
+        "name": "GET",
+        "kind": "function",
+        "file": "app\\api\\access-request\\route.ts",
+        "line": 125,
+        "exported": true
+      },
+      {
+        "name": "GET",
+        "kind": "function",
+        "file": "app\\api\\setup\\seed\\route.ts",
+        "line": 499,
+        "exported": true
+      },
+      {
+        "name": "GET",
+        "kind": "function",
+        "file": "app\\api\\setup\\reset-password\\route.ts",
+        "line": 63,
+        "exported": true
+      },
+      {
+        "name": "GET",
+        "kind": "function",
+        "file": "app\\api\\setup\\check-user\\route.ts",
+        "line": 4,
+        "exported": true
+      },
+      {
+        "name": "getAcademicYearOptions",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 217,
+        "exported": true
+      },
+      {
+        "name": "getCurrentAcademicYear",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 208,
+        "exported": true
+      },
+      {
+        "name": "getFromStorage",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 179,
+        "exported": true
+      },
+      {
+        "name": "getInitials",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 131,
+        "exported": true
+      },
+      {
+        "name": "HomePage",
+        "kind": "function",
+        "file": "app\\page.tsx",
+        "line": 12,
+        "exported": true
+      },
+      {
+        "name": "isNotFutureDate",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 38,
+        "exported": true
+      },
+      {
+        "name": "isValidBrazilianPhone",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 102,
+        "exported": true
+      },
+      {
+        "name": "isValidEmail",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 121,
+        "exported": true
+      },
+      {
+        "name": "LoginForm",
+        "kind": "function",
+        "file": "components\\auth\\LoginForm.tsx",
+        "line": 19,
+        "exported": true
+      },
+      {
+        "name": "maskPhone",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 83,
+        "exported": true
+      },
+      {
+        "name": "MinhasOcorrenciasPage",
+        "kind": "function",
+        "file": "app\\professor\\ocorrencias\\page.tsx",
+        "line": 24,
+        "exported": true
+      },
+      {
+        "name": "NavigationProgress",
+        "kind": "function",
+        "file": "components\\NavigationProgress.tsx",
+        "line": 14,
+        "exported": true
+      },
+      {
+        "name": "POST",
+        "kind": "function",
+        "file": "app\\api\\setup\\route.ts",
+        "line": 186,
+        "exported": true
+      },
+      {
+        "name": "POST",
+        "kind": "function",
+        "file": "app\\api\\approve-user\\route.ts",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "POST",
+        "kind": "function",
+        "file": "app\\api\\access-request\\route.ts",
+        "line": 4,
+        "exported": true
+      },
+      {
+        "name": "POST",
+        "kind": "function",
+        "file": "app\\api\\user\\toggle-status\\route.ts",
+        "line": 4,
+        "exported": true
+      },
+      {
+        "name": "POST",
+        "kind": "function",
+        "file": "app\\api\\setup\\seed\\route.ts",
+        "line": 81,
+        "exported": true
+      },
+      {
+        "name": "POST",
+        "kind": "function",
+        "file": "app\\api\\setup\\reset-password\\route.ts",
+        "line": 4,
+        "exported": true
+      },
+      {
+        "name": "ProgressLink",
+        "kind": "function",
+        "file": "components\\ProgressLink.tsx",
+        "line": 14,
+        "exported": true
+      },
+      {
+        "name": "PUT",
+        "kind": "function",
+        "file": "app\\api\\user\\settings\\route.ts",
+        "line": 4,
+        "exported": true
+      },
+      {
+        "name": "PUT",
+        "kind": "function",
+        "file": "app\\api\\user\\edit\\route.ts",
+        "line": 4,
+        "exported": true
+      },
+      {
+        "name": "RelatoriosPage",
+        "kind": "function",
+        "file": "app\\admin\\relatorios\\page.tsx",
+        "line": 45,
+        "exported": true
+      },
+      {
+        "name": "removeFromStorage",
+        "kind": "function",
+        "file": "lib\\utils.ts",
+        "line": 198,
+        "exported": true
+      },
+      {
+        "name": "RootLayout",
+        "kind": "function",
+        "file": "app\\layout.tsx",
+        "line": 25,
+        "exported": true
+      },
+      {
+        "name": "sendAccessRequestNotification",
+        "kind": "function",
+        "file": "lib\\email\\sendVerificationEmail.ts",
+        "line": 68,
+        "exported": true
+      },
+      {
+        "name": "sendEmail",
+        "kind": "function",
+        "file": "lib\\email\\sendVerificationEmail.ts",
+        "line": 16,
+        "exported": true
+      },
+      {
+        "name": "sendOccurrenceNotification",
+        "kind": "function",
+        "file": "lib\\email\\sendVerificationEmail.ts",
+        "line": 86,
+        "exported": true
+      },
+      {
+        "name": "sendWelcomeEmail",
+        "kind": "function",
+        "file": "lib\\email\\sendVerificationEmail.ts",
+        "line": 45,
+        "exported": true
+      },
+      {
+        "name": "SettingsPage",
+        "kind": "function",
+        "file": "app\\settings\\page.tsx",
+        "line": 18,
+        "exported": true
+      }
+    ],
+    "types": [
+      {
+        "name": "AccessRequestStatus",
+        "kind": "type",
+        "file": "types\\index.ts",
+        "line": 7,
+        "exported": true
+      },
+      {
+        "name": "AccessRequestType",
+        "kind": "type",
+        "file": "types\\index.ts",
+        "line": 5,
+        "exported": true
+      },
+      {
+        "name": "EducationLevel",
+        "kind": "type",
+        "file": "types\\index.ts",
+        "line": 9,
+        "exported": true
+      },
+      {
+        "name": "EducationStage",
+        "kind": "type",
+        "file": "lib\\constants\\education.ts",
+        "line": 1,
+        "exported": true
+      },
+      {
+        "name": "ShiftType",
+        "kind": "type",
+        "file": "lib\\constants\\education.ts",
+        "line": 63,
+        "exported": true
+      },
+      {
+        "name": "UserRole",
+        "kind": "type",
+        "file": "types\\index.ts",
+        "line": 3,
+        "exported": true
+      }
+    ],
+    "enums": []
+  },
+  "publicAPI": [
+    {
+      "name": "AccessRequest",
+      "kind": "interface",
+      "file": "types\\index.ts",
+      "line": 125,
+      "exported": true
+    },
+    {
+      "name": "AccessRequestFormData",
+      "kind": "interface",
+      "file": "types\\index.ts",
+      "line": 172,
+      "exported": true
+    },
+    {
+      "name": "AccessRequestStatus",
+      "kind": "type",
+      "file": "types\\index.ts",
+      "line": 7,
+      "exported": true
+    },
+    {
+      "name": "AccessRequestType",
+      "kind": "type",
+      "file": "types\\index.ts",
+      "line": 5,
+      "exported": true
+    },
+    {
+      "name": "AddressData",
+      "kind": "interface",
+      "file": "components\\ui\\address-autocomplete.tsx",
+      "line": 7,
+      "exported": true
+    },
+    {
+      "name": "AlunosPage",
+      "kind": "function",
+      "file": "app\\admin\\alunos\\page.tsx",
+      "line": 32,
+      "exported": true
+    },
+    {
+      "name": "AuthContext",
+      "kind": "interface",
+      "file": "types\\index.ts",
+      "line": 222,
+      "exported": true
+    },
+    {
+      "name": "BadgeProps",
+      "kind": "interface",
+      "file": "components\\ui\\badge.tsx",
+      "line": 26,
+      "exported": true
+    },
+    {
+      "name": "buildClassLabel",
+      "kind": "function",
+      "file": "lib\\constants\\education.ts",
+      "line": 71,
+      "exported": true
+    },
+    {
+      "name": "ButtonProps",
+      "kind": "interface",
+      "file": "components\\ui\\button.tsx",
+      "line": 35,
+      "exported": true
+    },
+    {
+      "name": "canHaveSection",
+      "kind": "function",
+      "file": "lib\\constants\\education.ts",
+      "line": 67,
+      "exported": true
+    },
+    {
+      "name": "capitalize",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 56,
+      "exported": true
+    },
+    {
+      "name": "CheckboxProps",
+      "kind": "interface",
+      "file": "components\\ui\\checkbox.tsx",
+      "line": 7,
+      "exported": true
+    },
+    {
+      "name": "Class",
+      "kind": "interface",
+      "file": "types\\index.ts",
+      "line": 51,
+      "exported": true
+    },
+    {
+      "name": "ClassFormData",
+      "kind": "interface",
+      "file": "types\\index.ts",
+      "line": 205,
+      "exported": true
+    },
+    {
+      "name": "cn",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 5,
+      "exported": true
+    },
+    {
+      "name": "createClient",
+      "kind": "function",
+      "file": "lib\\supabase\\server.ts",
+      "line": 4,
+      "exported": true
+    },
+    {
+      "name": "createClient",
+      "kind": "function",
+      "file": "lib\\supabase\\client.ts",
+      "line": 3,
+      "exported": true
+    },
+    {
+      "name": "createServiceClient",
+      "kind": "function",
+      "file": "lib\\supabase\\server.ts",
+      "line": 30,
+      "exported": true
+    },
+    {
+      "name": "DashboardLayout",
+      "kind": "function",
+      "file": "components\\layout\\DashboardLayout.tsx",
+      "line": 19,
+      "exported": true
+    },
+    {
+      "name": "DashboardStats",
+      "kind": "interface",
+      "file": "types\\index.ts",
+      "line": 235,
+      "exported": true
+    },
+    {
+      "name": "debounce",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 167,
+      "exported": true
+    },
+    {
+      "name": "delay",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 162,
+      "exported": true
+    },
+    {
+      "name": "EducationLevel",
+      "kind": "type",
+      "file": "types\\index.ts",
+      "line": 9,
+      "exported": true
+    },
+    {
+      "name": "EducationLevel",
+      "kind": "interface",
+      "file": "lib\\constants\\education.ts",
+      "line": 9,
+      "exported": true
+    },
+    {
+      "name": "EducationStage",
+      "kind": "type",
+      "file": "lib\\constants\\education.ts",
+      "line": 1,
+      "exported": true
+    },
+    {
+      "name": "EducationYear",
+      "kind": "interface",
+      "file": "lib\\constants\\education.ts",
+      "line": 3,
+      "exported": true
+    },
+    {
+      "name": "formatDate",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 10,
+      "exported": true
+    },
+    {
+      "name": "formatDateForInput",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 32,
+      "exported": true
+    },
+    {
+      "name": "formatDateTime",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 20,
+      "exported": true
+    },
+    {
+      "name": "formatPhone",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 71,
+      "exported": true
+    },
+    {
+      "name": "generateSlug",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 46,
+      "exported": true
+    },
+    {
+      "name": "GET",
+      "kind": "function",
+      "file": "app\\api\\setup\\route.ts",
+      "line": 323,
+      "exported": true
+    },
+    {
+      "name": "GET",
+      "kind": "function",
+      "file": "app\\api\\access-request\\route.ts",
+      "line": 125,
+      "exported": true
+    },
+    {
+      "name": "GET",
+      "kind": "function",
+      "file": "app\\api\\setup\\seed\\route.ts",
+      "line": 499,
+      "exported": true
+    },
+    {
+      "name": "GET",
+      "kind": "function",
+      "file": "app\\api\\setup\\reset-password\\route.ts",
+      "line": 63,
+      "exported": true
+    },
+    {
+      "name": "GET",
+      "kind": "function",
+      "file": "app\\api\\setup\\check-user\\route.ts",
+      "line": 4,
+      "exported": true
+    },
+    {
+      "name": "getAcademicYearOptions",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 217,
+      "exported": true
+    },
+    {
+      "name": "getCurrentAcademicYear",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 208,
+      "exported": true
+    },
+    {
+      "name": "getFromStorage",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 179,
+      "exported": true
+    },
+    {
+      "name": "getInitials",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 131,
+      "exported": true
+    },
+    {
+      "name": "HomePage",
+      "kind": "function",
+      "file": "app\\page.tsx",
+      "line": 12,
+      "exported": true
+    },
+    {
+      "name": "InputProps",
+      "kind": "interface",
+      "file": "components\\ui\\input.tsx",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "Institution",
+      "kind": "interface",
+      "file": "types\\index.ts",
+      "line": 11,
+      "exported": true
+    },
+    {
+      "name": "isNotFutureDate",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 38,
+      "exported": true
+    },
+    {
+      "name": "isValidBrazilianPhone",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 102,
+      "exported": true
+    },
+    {
+      "name": "isValidEmail",
+      "kind": "function",
+      "file": "lib\\utils.ts",
+      "line": 121,
+      "exported": true
+    },
+    {
+      "name": "LabelProps",
+      "kind": "interface",
+      "file": "components\\ui\\label.tsx",
+      "line": 11,
+      "exported": true
+    },
+    {
+      "name": "LoginForm",
+      "kind": "function",
+      "file": "components\\auth\\LoginForm.tsx",
+      "line": 19,
+      "exported": true
+    },
+    {
+      "name": "LoginFormData",
+      "kind": "interface",
+      "file": "types\\index.ts",
+      "line": 167,
+      "exported": true
+    }
+  ],
+  "dependencies": {
+    "mostImported": [
+      {
+        "file": "C:\\Users\\davia\\OneDrive\\Área de Trabalho\\Hashtag Data Analyst\\Projetos\\Focus\\gestao-escolar\\components\\NavigationProgress.tsx",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Users\\davia\\OneDrive\\Área de Trabalho\\Hashtag Data Analyst\\Projetos\\Focus\\gestao-escolar\\app\\globals.css",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Users\\davia\\OneDrive\\Área de Trabalho\\Hashtag Data Analyst\\Projetos\\Focus\\gestao-escolar\\components\\ui\\input.tsx",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Users\\davia\\OneDrive\\Área de Trabalho\\Hashtag Data Analyst\\Projetos\\Focus\\gestao-escolar\\components\\layout\\Sidebar.tsx",
+        "importedBy": 1
+      },
+      {
+        "file": "C:\\Users\\davia\\OneDrive\\Área de Trabalho\\Hashtag Data Analyst\\Projetos\\Focus\\gestao-escolar\\components\\layout\\TopBar.tsx",
+        "importedBy": 1
+      }
+    ]
+  },
+  "stats": {
+    "totalSymbols": 128,
+    "exportedSymbols": 89,
+    "analysisTimeMs": 1178
+  }
+}

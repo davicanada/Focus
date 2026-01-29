@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "correcao-acentos-portugues",
+      "path": "plans/correcao-acentos-portugues.md",
+      "title": "Correcao de Acentuacao Portuguesa no App",
+      "summary": "Revisar todos os textos visiveis ao usuario e corrigir acentos (agudo, grave, circunflexo), cedilha e til",
+      "linkedAt": "2026-01-24T11:12:57.807Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "correcao-acentos-portugues"
+}

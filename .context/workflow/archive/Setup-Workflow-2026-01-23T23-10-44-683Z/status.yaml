@@ -1,0 +1,50 @@
+project:
+  name: "Setup Workflow"
+  scale: QUICK
+  started: "2026-01-23T01:17:34.217Z"
+  current_phase: E
+
+phases:
+  P:
+    status: skipped
+    reason: "Not required for scale QUICK"
+  R:
+    status: skipped
+    reason: "Not required for scale QUICK"
+  E:
+    status: in_progress
+    started_at: "2026-01-23T01:17:34.217Z"
+  V:
+    status: pending
+  C:
+    status: skipped
+    reason: "Not required for scale QUICK"
+
+execution:
+  history:
+    - timestamp: "2026-01-23T01:17:34.217Z"
+      phase: E
+      action: started
+    - timestamp: "2026-01-23T04:59:36.898Z"
+      phase: P
+      action: phase_skipped
+    - timestamp: "2026-01-23T04:59:36.898Z"
+      phase: R
+      action: phase_skipped
+    - timestamp: "2026-01-23T04:59:36.898Z"
+      phase: C
+      action: phase_skipped
+    - timestamp: "2026-01-23T04:59:36.898Z"
+      phase: E
+      action: plan_phase_updated
+      plan: "dummy-data-2025"
+      description: "Plan phase phase-2 updated to completed"
+  last_activity: "2026-01-23T04:59:36.898Z"
+  resume_context: "Fase do plano atualizada"
+
+approval:
+  plan_created: false
+  plan_approved: true
+  approved_by: "system-migration"
+  approved_at: "2026-01-23T04:59:36.898Z"
+
