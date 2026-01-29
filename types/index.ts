@@ -6,7 +6,7 @@ export type AccessRequestType = 'admin_new' | 'admin_existing' | 'professor' | '
 
 export type AccessRequestStatus = 'pending' | 'approved' | 'rejected';
 
-export type EducationLevel = 'infantil' | 'fundamental' | 'medio' | 'custom';
+export type EducationLevel = 'infantil' | 'fundamental_i' | 'fundamental_ii' | 'medio' | 'custom';
 
 export type PeriodType = 'bimestre' | 'trimestre' | 'semestre';
 
@@ -60,6 +60,7 @@ export interface Class {
   institution_id: string;
   school_year_id?: string; // Referência ao ano letivo
   name: string;
+  nickname?: string;
   education_level: EducationLevel;
   grade?: string;
   section?: string;
@@ -411,7 +412,8 @@ export interface DashboardStats {
 // Niveis de ensino do sistema brasileiro
 export const EDUCATION_LEVELS: Record<EducationLevel, { label: string; allowClassSection: boolean }> = {
   infantil: { label: 'Educacao Infantil', allowClassSection: false },
-  fundamental: { label: 'Ensino Fundamental', allowClassSection: true },
+  fundamental_i: { label: 'Ensino Fundamental I', allowClassSection: true },
+  fundamental_ii: { label: 'Ensino Fundamental II', allowClassSection: true },
   medio: { label: 'Ensino Medio', allowClassSection: true },
   custom: { label: 'Outro', allowClassSection: true }
 };

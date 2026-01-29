@@ -52,6 +52,8 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data: publicInstitutions,
+    }, {
+      headers: { 'Cache-Control': 'no-store' },
     });
   } catch (error) {
     console.error('Error in public institutions API:', error);

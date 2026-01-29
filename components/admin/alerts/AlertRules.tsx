@@ -283,7 +283,7 @@ export function AlertRules() {
     };
 
     const getNotifyTargetLabel = (target: AlertNotifyTarget) => {
-        return target === 'all_admins' ? 'Todos admins' : 'Apenas criador';
+        return target === 'all_admins' ? 'Todos admins e visualizadores' : 'Apenas criador';
     };
 
     const filteredStudents = selectedClassForStudent
@@ -650,7 +650,7 @@ export function AlertRules() {
                             onChange={(e) => setFormData({ ...formData, notify_target: e.target.value as AlertNotifyTarget })}
                         >
                             <option value="self">Apenas para mim</option>
-                            <option value="all_admins">Todos os administradores</option>
+                            <option value="all_admins">Todos os administradores e visualizadores</option>
                         </Select>
                     </div>
                 </div>

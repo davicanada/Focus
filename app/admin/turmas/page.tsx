@@ -23,10 +23,10 @@ import { Spinner } from '@/components/ui/spinner';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/client';
 import { getFromStorage, removeFromStorage, getAcademicYearOptions } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 import {
   EDUCATION_LEVELS,
   SHIFTS,
-  CLASS_SECTIONS,
   canHaveSection,
   buildClassLabel,
   type EducationStage,
@@ -51,11 +51,12 @@ export default function TurmasPage() {
 
   // Form state
   const [formData, setFormData] = useState({
-    education_level: 'fundamental' as EducationStage,
+    education_level: 'fundamental_i' as EducationStage,
     grade: '',
     section: '',
     shift: 'matutino',
     year: new Date().getFullYear(),
+    nickname: '',
   });
 
   useEffect(() => {
@@ -122,10 +123,11 @@ export default function TurmasPage() {
         section: classItem.section || '',
         shift: classItem.shift || 'matutino',
         year: classItem.year,
+        nickname: classItem.nickname || '',
       });
     } else {
       setEditingClass(null);
-      const defaultLevel = 'fundamental' as EducationStage;
+      const defaultLevel = 'fundamental_i' as EducationStage;
       const defaultGrade = EDUCATION_LEVELS[defaultLevel].years[0]?.code || '';
       setFormData({
         education_level: defaultLevel,
@@ -133,6 +135,7 @@ export default function TurmasPage() {
         section: '',
         shift: 'matutino',
         year: new Date().getFullYear(),
+        nickname: '',
       });
     }
     setShowModal(true);
@@ -174,6 +177,7 @@ export default function TurmasPage() {
 
       const classData = {
         name: generatedName,
+        nickname: formData.nickname || null,
         education_level: formData.education_level,
         grade: formData.grade || null,
         section: canHaveSection(formData.education_level) ? (formData.section || null) : null,
@@ -394,7 +398,10 @@ export default function TurmasPage() {
                       <TableBody>
                         {classes.map((classItem) => (
                           <TableRow key={classItem.id}>
-                            <TableCell className="font-medium">{classItem.name}</TableCell>
+                            <TableCell className="font-medium">
+                              {classItem.nickname || classItem.name}
+                              {classItem.nickname && <span className="text-xs text-muted-foreground ml-1">({classItem.name})</span>}
+                            </TableCell>
                             <TableCell>{EDUCATION_LEVELS[classItem.education_level as EducationStage]?.label || classItem.education_level}</TableCell>
                             <TableCell>
                               {classItem.grade || '-'} {classItem.section && `/ ${classItem.section}`}
@@ -535,19 +542,28 @@ export default function TurmasPage() {
           {/* Turma (Section) - only show if canHaveSection */}
           {canHaveSection(formData.education_level) && (
             <div className="space-y-2">
-              <Label htmlFor="section">Turma</Label>
-              <Select
+              <Label htmlFor="section">Seção (ex: A, B, M1)</Label>
+              <Input
                 id="section"
+                maxLength={3}
+                placeholder="Ex: A, B, M1"
                 value={formData.section}
-                onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-              >
-                <option value="">Sem divisão</option>
-                {CLASS_SECTIONS.map((section) => (
-                  <option key={section} value={section}>{section}</option>
-                ))}
-              </Select>
+                onChange={(e) => setFormData({ ...formData, section: e.target.value.toUpperCase() })}
+              />
             </div>
           )}
+
+          {/* Apelido opcional */}
+          <div className="space-y-2">
+            <Label htmlFor="nickname">Apelido (opcional)</Label>
+            <Input
+              id="nickname"
+              maxLength={100}
+              placeholder="Ex: Turma da Manhã, Integral A"
+              value={formData.nickname}
+              onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
+            />
+          </div>
 
           {/* Turno (Shift) */}
           <div className="space-y-2">

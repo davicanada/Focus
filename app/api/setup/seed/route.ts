@@ -39,10 +39,10 @@ const INSTITUTION_DATA = {
 
 // Turmas - 4 Ensino Fundamental + 2 Ensino Medio
 const CLASSES_DATA = [
-  { name: '8o Ano A - Matutino', education_level: 'fundamental' as const, grade: '8', section: 'A', shift: 'Matutino', year: 2026, student_count: 20 },
-  { name: '8o Ano B - Vespertino', education_level: 'fundamental' as const, grade: '8', section: 'B', shift: 'Vespertino', year: 2026, student_count: 19 },
-  { name: '9o Ano A - Matutino', education_level: 'fundamental' as const, grade: '9', section: 'A', shift: 'Matutino', year: 2026, student_count: 21 },
-  { name: '9o Ano B - Matutino', education_level: 'fundamental' as const, grade: '9', section: 'B', shift: 'Matutino', year: 2026, student_count: 18 },
+  { name: '8o Ano A - Matutino', education_level: 'fundamental_ii' as const, grade: '8', section: 'A', shift: 'Matutino', year: 2026, student_count: 20 },
+  { name: '8o Ano B - Vespertino', education_level: 'fundamental_ii' as const, grade: '8', section: 'B', shift: 'Vespertino', year: 2026, student_count: 19 },
+  { name: '9o Ano A - Matutino', education_level: 'fundamental_ii' as const, grade: '9', section: 'A', shift: 'Matutino', year: 2026, student_count: 21 },
+  { name: '9o Ano B - Matutino', education_level: 'fundamental_ii' as const, grade: '9', section: 'B', shift: 'Matutino', year: 2026, student_count: 18 },
   { name: '1a Serie A - Matutino', education_level: 'medio' as const, grade: '1', section: 'A', shift: 'Matutino', year: 2026, student_count: 22 },
   { name: '1a Serie B - Vespertino', education_level: 'medio' as const, grade: '1', section: 'B', shift: 'Vespertino', year: 2026, student_count: 20 },
 ];

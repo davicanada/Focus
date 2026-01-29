@@ -200,10 +200,11 @@ export const CHART_COLORS = {
 
   // === NÍVEL DE ENSINO ===
   educationLevel: {
-    infantil: '#a855f7',   // Purple 500
-    fundamental: '#3b82f6', // Blue 500
-    medio: '#14b8a6',      // Teal 500
-    custom: '#6b7280',     // Gray 500
+    infantil: '#a855f7',       // Purple 500
+    fundamental_i: '#3b82f6',  // Blue 500
+    fundamental_ii: '#0ea5e9', // Sky 500
+    medio: '#14b8a6',          // Teal 500
+    custom: '#6b7280',         // Gray 500
   },
 
   // === TURNO ===

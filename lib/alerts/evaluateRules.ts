@@ -284,7 +284,7 @@ async function sendAlertEmails(
           users!inner(email, full_name)
         `)
         .eq('institution_id', rule.institution_id)
-        .eq('role', 'admin')
+        .in('role', ['admin', 'admin_viewer'])
         .eq('is_active', true);
 
       if (admins) {

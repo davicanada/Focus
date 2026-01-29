@@ -57,14 +57,16 @@ const severityKeysFromLabels: Record<string, string> = {
 // Education level labels
 const educationLevelLabels: Record<string, string> = {
   infantil: 'Ed. Infantil',
-  fundamental: 'Fundamental',
+  fundamental_i: 'Fund. I',
+  fundamental_ii: 'Fund. II',
   medio: 'Ensino Medio',
   custom: 'Outro',
 };
 
 const educationLevelKeysFromLabels: Record<string, string> = {
   'Ed. Infantil': 'infantil',
-  'Fundamental': 'fundamental',
+  'Fund. I': 'fundamental_i',
+  'Fund. II': 'fundamental_ii',
   'Ensino Medio': 'medio',
   'Outro': 'custom',
 };

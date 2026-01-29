@@ -1,4 +1,4 @@
-export type EducationStage = 'infantil' | 'fundamental' | 'medio' | 'custom';
+export type EducationStage = 'infantil' | 'fundamental_i' | 'fundamental_ii' | 'medio' | 'custom';
 
 export interface EducationYear {
   code: string;
@@ -21,19 +21,25 @@ export const EDUCATION_LEVELS: Record<EducationStage, EducationLevel> = {
       { code: 'pre', label: 'Pré-escola', order: 2 }
     ]
   },
-  fundamental: {
-    label: 'Ensino Fundamental',
+  fundamental_i: {
+    label: 'Ensino Fundamental I',
     allowClassSection: true,
     years: [
       { code: '1', label: '1º ano', order: 1 },
       { code: '2', label: '2º ano', order: 2 },
       { code: '3', label: '3º ano', order: 3 },
       { code: '4', label: '4º ano', order: 4 },
-      { code: '5', label: '5º ano', order: 5 },
-      { code: '6', label: '6º ano', order: 6 },
-      { code: '7', label: '7º ano', order: 7 },
-      { code: '8', label: '8º ano', order: 8 },
-      { code: '9', label: '9º ano', order: 9 }
+      { code: '5', label: '5º ano', order: 5 }
+    ]
+  },
+  fundamental_ii: {
+    label: 'Ensino Fundamental II',
+    allowClassSection: true,
+    years: [
+      { code: '6', label: '6º ano', order: 1 },
+      { code: '7', label: '7º ano', order: 2 },
+      { code: '8', label: '8º ano', order: 3 },
+      { code: '9', label: '9º ano', order: 4 }
     ]
   },
   medio: {
@@ -62,10 +68,8 @@ export const SHIFTS = [
 
 export type ShiftType = typeof SHIFTS[number]['value'];
 
-export const CLASS_SECTIONS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] as const;
-
 export function canHaveSection(stage: EducationStage): boolean {
-  return stage === 'fundamental' || stage === 'medio' || stage === 'custom';
+  return stage === 'fundamental_i' || stage === 'fundamental_ii' || stage === 'medio' || stage === 'custom';
 }
 
 export function buildClassLabel(
