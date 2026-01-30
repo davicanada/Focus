@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
+
+const DELETION_WINDOW_MS = 48 * 60 * 60 * 1000; // 48 horas
 
 // PUT - Atualizar ocorrência (apenas o professor que registrou)
 export async function PUT(
@@ -74,5 +76,70 @@ export async function PUT(
   } catch (error) {
     console.error('Error updating occurrence:', error);
     return NextResponse.json({ error: 'Erro ao atualizar ocorrência' }, { status: 500 });
+  }
+}
+
+// DELETE - Soft delete de ocorrência (professor, dentro de 48h)
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: occurrenceId } = await params;
+    const supabase = await createClient();
+
+    // Verificar usuário autenticado
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
+    }
+
+    // Buscar ocorrência com service client (bypassa RLS)
+    const serviceClient = createServiceClient();
+    const { data: occurrence, error: fetchError } = await serviceClient
+      .from('occurrences')
+      .select('id, registered_by, created_at, deleted_at')
+      .eq('id', occurrenceId)
+      .single();
+
+    if (fetchError || !occurrence) {
+      return NextResponse.json({ error: 'Ocorrência não encontrada' }, { status: 404 });
+    }
+
+    // Verificar se já foi excluída
+    if (occurrence.deleted_at) {
+      return NextResponse.json({ error: 'Ocorrência já foi excluída' }, { status: 400 });
+    }
+
+    // Verificar ownership
+    if (occurrence.registered_by !== user.id) {
+      return NextResponse.json({ error: 'Sem permissão para excluir esta ocorrência' }, { status: 403 });
+    }
+
+    // Verificar janela de 48h
+    const createdAt = new Date(occurrence.created_at).getTime();
+    const now = Date.now();
+    if (now - createdAt > DELETION_WINDOW_MS) {
+      return NextResponse.json({ error: 'Prazo de 48 horas para exclusão expirado' }, { status: 403 });
+    }
+
+    // Soft delete via service client
+    const { error: deleteError } = await serviceClient
+      .from('occurrences')
+      .update({
+        deleted_at: new Date().toISOString(),
+        deleted_by: user.id,
+      })
+      .eq('id', occurrenceId);
+
+    if (deleteError) {
+      console.error('Error deleting occurrence:', deleteError);
+      return NextResponse.json({ error: 'Erro ao excluir ocorrência' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting occurrence:', error);
+    return NextResponse.json({ error: 'Erro ao excluir ocorrência' }, { status: 500 });
   }
 }

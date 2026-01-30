@@ -7,6 +7,7 @@ import {
   Building2,
   RefreshCcw,
   Menu,
+  Clock,
 } from 'lucide-react';
 import { cn, getInitials } from '@/lib/utils';
 import type { UserRole, Institution, UserInstitution } from '@/types';
@@ -21,6 +22,8 @@ interface TopBarProps {
   onSwitchInstitution?: (institutionId: string) => void;
   onSwitchRole?: (role: UserRole) => void;
   onMenuClick?: () => void;
+  selectedShift?: string | null;
+  onChangeShift?: () => void;
 }
 
 export function TopBar({
@@ -33,6 +36,8 @@ export function TopBar({
   onSwitchInstitution,
   onSwitchRole,
   onMenuClick,
+  selectedShift,
+  onChangeShift,
 }: TopBarProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showInstitutionMenu, setShowInstitutionMenu] = useState(false);
@@ -116,6 +121,18 @@ export function TopBar({
               title="Trocar papel"
             >
               <RefreshCcw className="h-4 w-4 text-muted-foreground" />
+            </button>
+          )}
+
+          {/* Shift Badge - Professor only */}
+          {selectedShift && selectedShift !== 'all' && (
+            <button
+              onClick={onChangeShift}
+              className="flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors"
+              title="Trocar turno"
+            >
+              <Clock className="h-3 w-3" />
+              {selectedShift.charAt(0).toUpperCase() + selectedShift.slice(1)}
             </button>
           )}
         </div>

@@ -60,9 +60,17 @@ export default function RegistrarOcorrenciaPage() {
   const loadOptions = async (institutionId: string) => {
     try {
       const supabase = createClient();
+      const selectedShift = sessionStorage.getItem('selectedShift');
+
+      let classesQuery = supabase.from('classes').select('*').eq('institution_id', institutionId).eq('is_active', true).is('deleted_at', null);
+
+      // Filtrar por turno se selecionado (exceto 'all' que mostra todas)
+      if (selectedShift && selectedShift !== 'all') {
+        classesQuery = classesQuery.eq('shift', selectedShift);
+      }
 
       const [classesRes, typesRes] = await Promise.all([
-        supabase.from('classes').select('*').eq('institution_id', institutionId).eq('is_active', true).is('deleted_at', null).order('name'),
+        classesQuery.order('name'),
         supabase.from('occurrence_types').select('*').eq('institution_id', institutionId).eq('is_active', true).order('category'),
       ]);
 
@@ -218,6 +226,11 @@ export default function RegistrarOcorrenciaPage() {
       currentRole="professor"
       currentInstitution={currentInstitution || undefined}
       onSignOut={handleSignOut}
+      selectedShift={typeof window !== 'undefined' ? sessionStorage.getItem('selectedShift') : null}
+      onChangeShift={() => {
+        sessionStorage.removeItem('selectedShift');
+        window.location.href = '/professor';
+      }}
     >
       <div className="space-y-6">
         <div>

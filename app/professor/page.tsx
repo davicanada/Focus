@@ -6,6 +6,7 @@ import { PlusCircle, List, ClipboardList, TrendingUp } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { QuickActionCard } from '@/components/dashboard/QuickActionCard';
+import { ShiftSelector } from '@/components/ShiftSelector';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
@@ -19,6 +20,9 @@ export default function ProfessorDashboardPage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentInstitution, setCurrentInstitution] = useState<Institution | null>(null);
   const [userInstitutions, setUserInstitutions] = useState<(UserInstitution & { institution: Institution })[]>([]);
+
+  const [selectedShift, setSelectedShift] = useState<string | null>(null);
+  const [shiftChecked, setShiftChecked] = useState(false);
 
   // Stats
   const [stats, setStats] = useState({
@@ -43,6 +47,16 @@ export default function ProfessorDashboardPage() {
       setCurrentUser(user);
       setCurrentInstitution(institution);
       setUserInstitutions(userInst);
+
+      // Verificar se já tem turno selecionado na sessão
+      const savedShift = sessionStorage.getItem('selectedShift');
+      if (savedShift) {
+        setSelectedShift(savedShift);
+        setShiftChecked(true);
+      } else {
+        setShiftChecked(true);
+      }
+
       await loadDashboardData(institution.id, user.id);
       setIsLoading(false);
     };
@@ -122,6 +136,11 @@ export default function ProfessorDashboardPage() {
     }
   };
 
+  const handleShiftSelected = (shift: string) => {
+    sessionStorage.setItem('selectedShift', shift);
+    setSelectedShift(shift);
+  };
+
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -129,6 +148,7 @@ export default function ProfessorDashboardPage() {
     removeFromStorage('currentUser');
     removeFromStorage('currentInstitution');
     removeFromStorage('userInstitutions');
+    sessionStorage.removeItem('selectedShift');
     router.push('/');
   };
 
@@ -160,6 +180,17 @@ export default function ProfessorDashboardPage() {
     );
   }
 
+  // Mostrar seletor de turno se ainda não selecionou
+  if (shiftChecked && !selectedShift && currentInstitution) {
+    return (
+      <ShiftSelector
+        institutionId={currentInstitution.id}
+        institutionName={currentInstitution.name}
+        onShiftSelected={handleShiftSelected}
+      />
+    );
+  }
+
   return (
     <DashboardLayout
       userName={currentUser?.full_name || ''}
@@ -169,6 +200,11 @@ export default function ProfessorDashboardPage() {
       userInstitutions={userInstitutions}
       onSignOut={handleSignOut}
       onSwitchInstitution={handleSwitchInstitution}
+      selectedShift={selectedShift}
+      onChangeShift={() => {
+        sessionStorage.removeItem('selectedShift');
+        setSelectedShift(null);
+      }}
     >
       <div className="space-y-6">
         <div>

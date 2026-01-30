@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { RefreshCcw, Search, Eye, Pencil } from 'lucide-react';
+import { RefreshCcw, Search, Eye, Pencil, Trash2 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,6 +53,15 @@ export default function MinhasOcorrenciasPage() {
     description: '',
   });
   const [saving, setSaving] = useState(false);
+
+  // Delete Modal
+  const [deletingOccurrence, setDeletingOccurrence] = useState<OccurrenceWithRelations | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const DELETION_WINDOW_MS = 48 * 60 * 60 * 1000;
+  const isWithin48h = (createdAt: string) => {
+    return Date.now() - new Date(createdAt).getTime() <= DELETION_WINDOW_MS;
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -211,6 +220,28 @@ export default function MinhasOcorrenciasPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!deletingOccurrence) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/occurrences/${deletingOccurrence.id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || 'Erro ao excluir ocorrência');
+        return;
+      }
+      toast.success('Ocorrência excluída com sucesso');
+      setDeletingOccurrence(null);
+      if (currentInstitution && currentUser) {
+        loadOccurrences(currentInstitution.id, currentUser.id);
+      }
+    } catch {
+      toast.error('Erro ao excluir ocorrência');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   // Filtered occurrences
   const filteredOccurrences = occurrences.filter((occurrence) => {
     const matchesSearch = occurrence.student?.full_name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -234,6 +265,11 @@ export default function MinhasOcorrenciasPage() {
       currentRole="professor"
       currentInstitution={currentInstitution || undefined}
       onSignOut={handleSignOut}
+      selectedShift={typeof window !== 'undefined' ? sessionStorage.getItem('selectedShift') : null}
+      onChangeShift={() => {
+        sessionStorage.removeItem('selectedShift');
+        window.location.href = '/professor';
+      }}
     >
       <div className="space-y-6">
         <div>
@@ -353,6 +389,17 @@ export default function MinhasOcorrenciasPage() {
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
+                          {isWithin48h(occurrence.created_at) && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setDeletingOccurrence(occurrence)}
+                              title="Excluir (disponível até 48h após registro)"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -494,6 +541,35 @@ export default function MinhasOcorrenciasPage() {
                 ) : (
                   'Salvar'
                 )}
+              </Button>
+            </ModalFooter>
+          </div>
+        )}
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={!!deletingOccurrence}
+        onClose={() => !deleting && setDeletingOccurrence(null)}
+        title="Excluir Ocorrência"
+      >
+        {deletingOccurrence && (
+          <div className="space-y-4">
+            <p>Tem certeza que deseja excluir esta ocorrência?</p>
+            <div className="rounded-md bg-muted p-3 text-sm space-y-1">
+              <p><strong>Aluno:</strong> {deletingOccurrence.student?.full_name}</p>
+              <p><strong>Tipo:</strong> {deletingOccurrence.occurrence_type?.category}</p>
+              <p><strong>Data:</strong> {formatDateTime(deletingOccurrence.occurrence_date)}</p>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Esta ação pode ser desfeita apenas por um administrador.
+            </p>
+            <ModalFooter>
+              <Button variant="outline" onClick={() => setDeletingOccurrence(null)} disabled={deleting}>
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+                {deleting ? 'Excluindo...' : 'Excluir'}
               </Button>
             </ModalFooter>
           </div>

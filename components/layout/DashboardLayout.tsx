@@ -17,6 +17,8 @@ interface DashboardLayoutProps {
   onSignOut: () => void;
   onSwitchInstitution?: (institutionId: string) => void;
   onSwitchRole?: (role: UserRole) => void;
+  selectedShift?: string | null;
+  onChangeShift?: () => void;
 }
 
 export function DashboardLayout({
@@ -29,6 +31,8 @@ export function DashboardLayout({
   onSignOut,
   onSwitchInstitution,
   onSwitchRole,
+  selectedShift,
+  onChangeShift,
 }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -63,6 +67,8 @@ export function DashboardLayout({
           onSwitchInstitution={onSwitchInstitution}
           onSwitchRole={onSwitchRole}
           onMenuClick={() => setSidebarOpen(true)}
+          selectedShift={selectedShift}
+          onChangeShift={onChangeShift}
         />
 
         {/* Page Content */}
