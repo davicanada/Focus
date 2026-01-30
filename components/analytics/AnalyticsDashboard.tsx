@@ -44,13 +44,13 @@ interface KPIData {
 // Labels mapping
 const severityLabels: Record<string, string> = {
   leve: 'Leve',
-  media: 'Media',
+  media: 'Média',
   grave: 'Grave',
 };
 
 const severityKeysFromLabels: Record<string, string> = {
   Leve: 'leve',
-  Media: 'media',
+  Média: 'media',
   Grave: 'grave',
 };
 
@@ -1026,13 +1026,13 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         {/* KPI Cards */}
         <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
           <KPICard
-            title="Total Ocorrencias"
+            title="Total Ocorrências"
             value={kpiData.totalOccurrences}
             subtitle={hasActiveFilters ? 'filtrado' : `em ${selectedYear}`}
             icon={<BarChart2 size={14} />}
           />
           <KPICard
-            title="Media por Turma"
+            title="Média por Turma"
             value={kpiData.averagePerClass.toFixed(1)}
             subtitle={hasActiveFilters ? 'filtrado' : `em ${selectedYear}`}
             icon={<AlertCircle size={14} />}
@@ -1051,11 +1051,11 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
           />
         </div>
 
-        {/* Row 1: Tendencia Mensal + Distribuicao por Categoria */}
+        {/* Row 1: Tendência Mensal + Distribuição por Categoria */}
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
           <AnalyticsCard
-            title={`Tendencia Mensal - ${selectedYear}`}
-            subtitle="Ocorrencias por mes (clique para filtrar)"
+            title={`Tendência Mensal - ${selectedYear}`}
+            subtitle="Ocorrências por mês (clique para filtrar)"
           >
             <ReactECharts
               option={monthlyChartOption}
@@ -1065,7 +1065,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
           </AnalyticsCard>
 
           <AnalyticsCard
-            title="Distribuicao por Categoria"
+            title="Distribuição por Categoria"
             subtitle="Por tipo (clique para filtrar)"
           >
             <div className="grid grid-cols-2 gap-2">
@@ -1095,13 +1095,13 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
           </AnalyticsCard>
         </div>
 
-        {/* Row 2: Donuts (Nivel + Turno) + Ocorrencias por Turma */}
+        {/* Row 2: Donuts (Nível + Turno) + Ocorrências por Turma */}
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
           <div className="rounded-lg border bg-card overflow-hidden shadow-sm">
             <div className="grid grid-cols-2">
               <div>
                 <div className="px-3 py-1.5" style={{ backgroundColor: ANALYTICS_COLORS.headerBg }}>
-                  <h3 className="text-xs font-semibold text-white">Por Nivel de Ensino</h3>
+                  <h3 className="text-xs font-semibold text-white">Por Nível de Ensino</h3>
                   <p className="text-[10px] text-white/70">Por nivel (clique para filtrar)</p>
                 </div>
                 <div className="p-2">
@@ -1137,8 +1137,8 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
           </div>
 
           <AnalyticsCard
-            title="Ocorrencias por Turma"
-            subtitle="Maximo (escuro) / Minimo (claro)"
+            title="Ocorrências por Turma"
+            subtitle="Máximo (escuro) / Mínimo (claro)"
           >
             {classData.length > 0 ? (
               <ReactECharts
@@ -1152,10 +1152,10 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
           </AnalyticsCard>
         </div>
 
-        {/* Row 3: Alunos com Ocorrencias + Alunos sem Ocorrencias */}
+        {/* Row 3: Alunos com Ocorrências + Alunos sem Ocorrências */}
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
           <AnalyticsCard
-            title="Alunos com Ocorrencias"
+            title="Alunos com Ocorrências"
             subtitle={`${topStudents.length} alunos (clique para filtrar)`}
           >
             {topStudents.length > 0 ? (
@@ -1172,7 +1172,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
           </AnalyticsCard>
 
           <AnalyticsCard
-            title="Alunos sem Ocorrencias"
+            title="Alunos sem Ocorrências"
             subtitle={`${studentsWithoutOccurrences.length} aluno${studentsWithoutOccurrences.length !== 1 ? 's' : ''} sem registro${activeFilters.classIds.length > 0 ? ` (${activeFilters.classIds.join(', ')})` : ''}`}
           >
             {studentsWithoutOccurrences.length > 0 ? (
