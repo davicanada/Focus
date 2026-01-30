@@ -1138,7 +1138,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
 
           <AnalyticsCard
             title="Ocorrencias por Turma"
-            subtitle="Maximo (vermelho) / Minimo (verde)"
+            subtitle="Maximo (escuro) / Minimo (claro)"
           >
             {classData.length > 0 ? (
               <ReactECharts
