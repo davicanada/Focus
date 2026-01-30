@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateSQL, explainResults, getSensitiveDataResponse } from '@/lib/ai';
+import { generateSQL, explainResults, getSensitiveDataResponse, getJudgmentalResponse } from '@/lib/ai';
 import { anonymizeStudentData } from '@/lib/ai/shared';
 
 export async function POST(request: NextRequest) {
@@ -16,6 +16,18 @@ export async function POST(request: NextRequest) {
 
     // Generate SQL from the question (with automatic fallback Gemini -> OpenAI)
     const sqlResult = await generateSQL(question, institutionId);
+
+    // If it's a judgmental question about students, return educational response
+    if (sqlResult.isJudgmentalBlock) {
+      return NextResponse.json({
+        success: true,
+        query: null,
+        data: [],
+        explanation: getJudgmentalResponse(),
+        isSensitiveBlock: true,
+        provider: null,
+      });
+    }
 
     // If it's a sensitive data request, return natural response
     if (sqlResult.isSensitiveBlock) {

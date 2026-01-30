@@ -24,6 +24,30 @@ export const SENSITIVE_KEYWORDS = [
   'responsavel telefone', 'telefone do responsavel',
 ];
 
+// Keywords that indicate judgmental/prejudicial questions about students (ECA Art. 17)
+export const JUDGMENTAL_KEYWORDS = [
+  'pior aluno', 'pior estudante', 'pior crianca', 'pior criança',
+  'piores alunos', 'piores estudantes',
+  'aluno mais problematico', 'aluno mais problemático',
+  'aluna mais problematica', 'aluna mais problemática',
+  'mais problematico', 'mais problemático', 'mais problematica', 'mais problemática',
+  'aluno mais indisciplinado', 'aluna mais indisciplinada',
+  'mais indisciplinado', 'mais indisciplinada',
+  'aluno mais bagunceiro', 'aluna mais bagunceira',
+  'mais bagunceiro', 'mais bagunceira',
+  'aluno mais dificil', 'aluno mais difícil',
+  'aluna mais dificil', 'aluna mais difícil',
+  'aluno que mais atrapalha', 'aluna que mais atrapalha',
+  'mais insuportavel', 'mais insuportável',
+  'aluno terrivel', 'aluno terrível',
+  'mal comportado', 'mal-comportado', 'mau comportamento',
+  'encrenqueiro', 'encrenqueira',
+  'pestinha', 'delinquente',
+  'pior comportamento', 'pior desempenho disciplinar',
+  'aluno mais violento', 'aluna mais violenta',
+  'mais agressivo', 'mais agressiva',
+];
+
 // Database schema context for AI models
 export const SCHEMA_CONTEXT = `
 Voce e um assistente de analytics para um sistema de gestao escolar brasileiro.
@@ -232,6 +256,25 @@ export function containsSensitiveColumns(query: string): boolean {
 export function isSensitiveQuestion(question: string): boolean {
   const lower = question.toLowerCase();
   return SENSITIVE_KEYWORDS.some(keyword => lower.includes(keyword));
+}
+
+// Check if question contains judgmental/prejudicial language about students
+export function isJudgmentalQuestion(question: string): boolean {
+  const lower = question.toLowerCase();
+  return JUDGMENTAL_KEYWORDS.some(keyword => lower.includes(keyword));
+}
+
+// Get natural response for judgmental questions (ECA Art. 17)
+export function getJudgmentalResponse(): string {
+  return `Nao posso classificar alunos com rotulos como "pior", "mais problematico" ou similares. A dignidade da crianca e do adolescente e protegida pelo Estatuto da Crianca e do Adolescente (ECA Art. 17).
+
+Posso ajudar com dados objetivos, como:
+- Alunos com maior numero de ocorrencias no periodo
+- Distribuicao de ocorrencias por turma ou tipo
+- Evolucao mensal de ocorrencias
+- Comparativos entre periodos
+
+Reformule sua pergunta usando termos objetivos.`;
 }
 
 // Get natural response for sensitive data requests

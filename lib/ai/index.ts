@@ -3,12 +3,14 @@ import { generateSQLWithGroq, explainResultsWithGroq } from './groq';
 import {
   isSensitiveQuestion,
   getSensitiveDataResponse,
+  isJudgmentalQuestion,
+  getJudgmentalResponse,
   getFallbackExplanation,
   convertTimestampsToBrazilTime,
   AIProvider,
 } from './shared';
 
-export { isSensitiveQuestion, getSensitiveDataResponse };
+export { isSensitiveQuestion, getSensitiveDataResponse, isJudgmentalQuestion, getJudgmentalResponse };
 
 // Remove markdown formatting from text (convert to plain text)
 function stripMarkdown(text: string): string {
@@ -25,6 +27,7 @@ export interface AIAnalyticsResult {
   error?: string;
   provider?: AIProvider;
   isSensitiveBlock?: boolean;
+  isJudgmentalBlock?: boolean;
 }
 
 export interface ExplanationResult {
@@ -40,7 +43,16 @@ export async function generateSQL(
   question: string,
   institutionId: string
 ): Promise<AIAnalyticsResult> {
-  // Check for sensitive data requests first
+  // Check for judgmental/prejudicial questions about students (ECA Art. 17)
+  if (isJudgmentalQuestion(question)) {
+    return {
+      success: true,
+      isSensitiveBlock: true,
+      isJudgmentalBlock: true,
+    };
+  }
+
+  // Check for sensitive data requests (LGPD)
   if (isSensitiveQuestion(question)) {
     return {
       success: true,
