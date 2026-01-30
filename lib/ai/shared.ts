@@ -8,6 +8,9 @@ export const BLOCKED_COLUMNS = [
   'email',
   'full_address',
   'password',
+  'full_name',
+  'description',
+  'enrollment_number',
 ];
 
 // Keywords that indicate sensitive data requests
@@ -44,17 +47,20 @@ SCHEMA DO BANCO DE DADOS:
    - shift: 'matutino', 'vespertino', 'noturno', 'integral'
    - name: Ex: "6 Ano A", "1 Serie B"
 
-5. students (id, institution_id, class_id, full_name, enrollment_number, is_active, deleted_at)
+5. students (id, institution_id, class_id, is_active, deleted_at)
    - Alunos matriculados
+   - IMPORTANTE: Nao selecione colunas de identificacao pessoal (full_name, enrollment_number)
+   - Use apenas s.id para referenciar alunos
 
 6. occurrence_types (id, institution_id, category, severity, description, is_active)
    - Tipos de ocorrencia disponiveis
    - category: tipo da ocorrencia (ex: 'Atraso', 'Briga', 'Uso de Celular')
    - severity: 'leve', 'media', 'grave'
 
-7. occurrences (id, institution_id, student_id, occurrence_type_id, registered_by, occurrence_date, description, created_at)
+7. occurrences (id, institution_id, student_id, occurrence_type_id, registered_by, occurrence_date, created_at)
    - Ocorrencias registradas
    - registered_by: UUID do professor que registrou
+   - IMPORTANTE: Nao selecione a coluna description (dados sensiveis LGPD)
 
 8. quarters (id, institution_id, name, start_date, end_date, is_active)
    - Periodos/trimestres letivos
@@ -63,18 +69,20 @@ REGRAS IMPORTANTES:
 1. SEMPRE inclua institution_id = '{{INSTITUTION_ID}}' nos filtros
 2. Use JOINs quando precisar de dados de tabelas relacionadas
 3. Para ocorrencias, sempre faca JOIN com occurrence_types para ter category e severity
-4. Para ocorrencias, faca JOIN com students para ter o nome do aluno (full_name)
-5. Retorne dados uteis e formatados com aliases claros
-6. Use funcoes de agregacao (COUNT, SUM, AVG) quando apropriado
-7. Ordene os resultados de forma logica
-8. Limite os resultados a 100 registros maximo
-9. Use DATE functions para filtros temporais
-10. Para "ultima" ou "mais recente", use ORDER BY DESC e LIMIT
+4. Para referenciar alunos, use APENAS s.id (NUNCA s.full_name ou s.enrollment_number - dados protegidos LGPD)
+5. Para referenciar professores, use APENAS u.id (NUNCA u.full_name ou u.email)
+6. NUNCA selecione a coluna description de occurrences (dados sensiveis LGPD)
+7. Retorne dados uteis e formatados com aliases claros
+8. Use funcoes de agregacao (COUNT, SUM, AVG) quando apropriado
+9. Ordene os resultados de forma logica
+10. Limite os resultados a 100 registros maximo
+11. Use DATE functions para filtros temporais
+12. Para "ultima" ou "mais recente", use ORDER BY DESC e LIMIT
 
 EXEMPLOS:
 
 Pergunta: "Quais foram as ultimas 3 ocorrencias?"
-SELECT o.occurrence_date, s.full_name as aluno, ot.category as tipo, ot.severity as gravidade, o.description as descricao
+SELECT o.occurrence_date, s.id as student_id, ot.category as tipo, ot.severity as gravidade
 FROM occurrences o
 JOIN students s ON o.student_id = s.id
 JOIN occurrence_types ot ON o.occurrence_type_id = ot.id
@@ -92,11 +100,11 @@ GROUP BY c.id, c.name
 ORDER BY total_alunos DESC;
 
 Pergunta: "Quem e o aluno com mais ocorrencias?"
-SELECT s.full_name as aluno, COUNT(o.id) as total_ocorrencias
+SELECT s.id as student_id, COUNT(o.id) as total_ocorrencias
 FROM students s
 JOIN occurrences o ON s.id = o.student_id
 WHERE s.institution_id = '{{INSTITUTION_ID}}'
-GROUP BY s.id, s.full_name
+GROUP BY s.id
 ORDER BY total_ocorrencias DESC
 LIMIT 1;
 
@@ -110,7 +118,7 @@ Pergunta: "Quais sao os top 3 alunos com mais ocorrencias de cada turma?"
 WITH ranked AS (
   SELECT
     c.name as turma,
-    s.full_name as aluno,
+    s.id as student_id,
     COUNT(o.id) as total_ocorrencias,
     ROW_NUMBER() OVER (PARTITION BY c.id ORDER BY COUNT(o.id) DESC) as posicao
   FROM classes c
@@ -118,9 +126,9 @@ WITH ranked AS (
   JOIN occurrences o ON s.id = o.student_id
   WHERE c.institution_id = '{{INSTITUTION_ID}}'
   AND c.is_active = true AND c.deleted_at IS NULL
-  GROUP BY c.id, c.name, s.id, s.full_name
+  GROUP BY c.id, c.name, s.id
 )
-SELECT turma, aluno, total_ocorrencias, posicao
+SELECT turma, student_id, total_ocorrencias, posicao
 FROM ranked
 WHERE posicao <= 3
 ORDER BY turma, posicao;
@@ -129,7 +137,7 @@ Pergunta: "Qual a ocorrencia mais recente de cada turma?"
 WITH ranked AS (
   SELECT
     c.name as turma,
-    s.full_name as aluno,
+    s.id as student_id,
     ot.category as tipo,
     o.occurrence_date,
     ROW_NUMBER() OVER (PARTITION BY c.id ORDER BY o.occurrence_date DESC) as posicao
@@ -139,7 +147,7 @@ WITH ranked AS (
   JOIN occurrence_types ot ON o.occurrence_type_id = ot.id
   WHERE c.institution_id = '{{INSTITUTION_ID}}'
 )
-SELECT turma, aluno, tipo, occurrence_date
+SELECT turma, student_id, tipo, occurrence_date
 FROM ranked
 WHERE posicao = 1
 ORDER BY turma;
@@ -166,15 +174,17 @@ INSTRUCOES IMPORTANTES:
 2. CRUCIAL: Se os dados contem grupos (ex: por turma, por categoria), MENCIONE TODOS OS GRUPOS
 3. Para rankings por grupo (ex: "top 3 por turma"), liste CADA GRUPO com seus respectivos resultados
 4. Use formatacao clara: separe cada grupo por linha ou paragrafo
-5. Destaque os numeros e nomes importantes
+5. Destaque os numeros importantes
 6. Se nao houver dados, explique que nao foram encontrados resultados
 7. NAO mencione SQL, JSON, banco de dados, queries ou termos tecnicos
 8. Use um tom profissional mas acolhedor
+9. PRIVACIDADE (LGPD): Os dados usam labels anonimizados como "Aluno 1", "Aluno 2" para proteger identidades. Use EXATAMENTE esses labels nas respostas. NUNCA tente inferir ou inventar nomes reais.
+10. Se os dados contiverem student_id (UUIDs), refira-se a eles como "Aluno 1", "Aluno 2", etc. na ordem em que aparecem.
 
 EXEMPLO DE RESPOSTA PARA RANKING POR GRUPO:
 Se a pergunta for "top 3 alunos por turma" e houver 4 turmas, a resposta DEVE mencionar TODAS as 4 turmas:
-"No 1o Ano A, os alunos com mais ocorrencias sao: Fulano (10), Ciclano (8) e Beltrano (5).
-No 1o Ano B, temos: Aluno1 (12), Aluno2 (9) e Aluno3 (7).
+"No 1o Ano A, os alunos com mais ocorrencias sao: Aluno 1 (10), Aluno 2 (8) e Aluno 3 (5).
+No 1o Ano B, temos: Aluno 4 (12), Aluno 5 (9) e Aluno 6 (7).
 No 2o Ano A, os destaques sao: ..."
 E assim por diante para TODAS as turmas.
 
@@ -313,6 +323,50 @@ export function convertTimestampsToBrazilTime(data: any[]): any[] {
     }
     return newRow;
   });
+}
+
+// Anonymize student data in query results before sending to AI
+// Returns sanitized data + mapping of student_id -> label for frontend resolution
+export function anonymizeStudentData(data: any[]): {
+  sanitizedData: any[];
+  studentMap: Record<string, string>; // student_id -> "Aluno 1", "Aluno 2", etc.
+} {
+  if (!data || data.length === 0) {
+    return { sanitizedData: data, studentMap: {} };
+  }
+
+  const studentMap: Record<string, string> = {};
+  let studentCounter = 0;
+
+  const getLabel = (studentId: string): string => {
+    if (!studentMap[studentId]) {
+      studentCounter++;
+      studentMap[studentId] = `Aluno ${studentCounter}`;
+    }
+    return studentMap[studentId];
+  };
+
+  const sanitizedData = data.map(row => {
+    const newRow = { ...row };
+
+    // Replace student_id with label if present
+    if (newRow.student_id) {
+      const label = getLabel(newRow.student_id);
+      newRow.student_id = label;
+    }
+
+    // Remove any full_name, description, or enrollment_number that leaked through
+    delete newRow.full_name;
+    delete newRow.aluno;
+    delete newRow.description;
+    delete newRow.descricao;
+    delete newRow.enrollment_number;
+    delete newRow.matricula;
+
+    return newRow;
+  });
+
+  return { sanitizedData, studentMap };
 }
 
 // Types

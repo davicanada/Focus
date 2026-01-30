@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateSQL, explainResults, getSensitiveDataResponse } from '@/lib/ai';
+import { anonymizeStudentData } from '@/lib/ai/shared';
 
 export async function POST(request: NextRequest) {
   try {
@@ -82,14 +83,19 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
     const dataArray = Array.isArray(data) ? data : [data];
 
+    // LGPD: Anonymize student data before sending to AI for explanation
+    const { sanitizedData, studentMap } = anonymizeStudentData(dataArray);
+
     // Get AI explanation of results (with automatic fallback)
-    const { explanation, provider: explainProvider } = await explainResults(question, dataArray);
+    // AI only sees anonymized data ("Aluno 1", "Aluno 2", etc.)
+    const { explanation, provider: explainProvider } = await explainResults(question, sanitizedData);
 
     return NextResponse.json({
       success: true,
       query,
-      data: dataArray,
+      data: sanitizedData,
       explanation,
+      studentMap, // Frontend uses this to resolve "Aluno 1" -> real name
       provider: sqlResult.provider,
     });
   } catch (error) {

@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Bot, User, Loader2, Sparkles, AlertCircle, ExternalLink } from 'lucide-react';
+import { Send, Bot, User, Loader2, Sparkles, AlertCircle, ExternalLink, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/client';
 
 interface Message {
   id: string;
@@ -29,6 +30,47 @@ const formatMarkdown = (text: string): string => {
   // Convert **text** to <strong>text</strong>
   return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 };
+
+// Resolve student IDs to real names using Supabase client (never sent to AI)
+async function resolveStudentNames(
+  studentMap: Record<string, string>
+): Promise<Record<string, string>> {
+  // studentMap: { "uuid-123": "Aluno 1", "uuid-456": "Aluno 2" }
+  // returns: { "Aluno 1": "João Silva", "Aluno 2": "Maria Santos" }
+  const studentIds = Object.keys(studentMap);
+  if (studentIds.length === 0) return {};
+
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('students')
+    .select('id, full_name')
+    .in('id', studentIds);
+
+  if (!data) return {};
+
+  const labelToName: Record<string, string> = {};
+  for (const student of data) {
+    const label = studentMap[student.id];
+    if (label) {
+      labelToName[label] = student.full_name;
+    }
+  }
+  return labelToName;
+}
+
+// Replace anonymized labels with real names in explanation text
+function replaceLabelsWithNames(
+  text: string,
+  labelToName: Record<string, string>
+): string {
+  let result = text;
+  // Sort by label length descending to avoid "Aluno 1" replacing part of "Aluno 10"
+  const labels = Object.keys(labelToName).sort((a, b) => b.length - a.length);
+  for (const label of labels) {
+    result = result.replaceAll(label, labelToName[label]);
+  }
+  return result;
+}
 
 export function AIChat({ institutionId }: AIChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -77,12 +119,20 @@ export function AIChat({ institutionId }: AIChatProps) {
 
       const result = await response.json();
 
+      // LGPD: Resolve anonymized labels to real names client-side only
+      let explanationText = result.success
+        ? result.explanation || 'Consulta executada com sucesso.'
+        : result.error || 'Ocorreu um erro ao processar sua pergunta.';
+
+      if (result.success && result.studentMap && Object.keys(result.studentMap).length > 0) {
+        const labelToName = await resolveStudentNames(result.studentMap);
+        explanationText = replaceLabelsWithNames(explanationText, labelToName);
+      }
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: result.success
-          ? result.explanation || 'Consulta executada com sucesso.'
-          : result.error || 'Ocorreu um erro ao processar sua pergunta.',
+        content: explanationText,
         timestamp: new Date(),
         isError: !result.success,
       };
@@ -110,6 +160,10 @@ export function AIChat({ institutionId }: AIChatProps) {
           AI Analytics
           <span className="text-xs font-normal text-muted-foreground ml-2">
             Powered by Gemini
+          </span>
+          <span className="text-xs font-normal text-green-600 ml-auto flex items-center gap-1">
+            <Shield className="h-3 w-3" />
+            LGPD
           </span>
         </CardTitle>
       </CardHeader>
