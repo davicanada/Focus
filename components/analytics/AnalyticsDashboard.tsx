@@ -275,38 +275,49 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
 
       // OPTIMIZED: Only 2 queries instead of 6
       // Query 1: All occurrences with complete relations for the year
-      const occurrencesQuery = supabase
-        .from('occurrences')
-        .select(`
-          id,
-          occurrence_date,
-          student_id,
-          occurrence_type:occurrence_types(category, severity),
-          student:students(
+      // Supabase PostgREST caps at 1000 rows per request, so we paginate
+      const PAGE_SIZE = 1000;
+      let allOccurrences: any[] = [];
+      let page = 0;
+      let hasMore = true;
+      while (hasMore) {
+        const from = page * PAGE_SIZE;
+        const to = from + PAGE_SIZE - 1;
+        const { data: batch } = await supabase
+          .from('occurrences')
+          .select(`
             id,
-            full_name,
-            class:classes(id, name, education_level, shift)
-          )
-        `)
-        .eq('institution_id', institutionId)
-        .is('deleted_at', null)
-        .gte('occurrence_date', startOfYear)
-        .lte('occurrence_date', endOfYear)
-        .range(0, 9999);
+            occurrence_date,
+            student_id,
+            occurrence_type:occurrence_types(category, severity),
+            student:students(
+              id,
+              full_name,
+              class:classes(id, name, education_level, shift)
+            )
+          `)
+          .eq('institution_id', institutionId)
+          .is('deleted_at', null)
+          .gte('occurrence_date', startOfYear)
+          .lte('occurrence_date', endOfYear)
+          .range(from, to);
+
+        if (batch && batch.length > 0) {
+          allOccurrences = allOccurrences.concat(batch);
+          hasMore = batch.length === PAGE_SIZE;
+        } else {
+          hasMore = false;
+        }
+        page++;
+      }
 
       // Query 2: All students (needed for "without occurrences" list)
-      const studentsQuery = supabase
+      const { data: allStudentsData } = await supabase
         .from('students')
         .select('id, full_name, class:classes(name)')
         .eq('institution_id', institutionId)
         .eq('is_active', true)
         .is('deleted_at', null);
-
-      // Execute both queries in parallel
-      const [{ data: allOccurrences }, { data: allStudentsData }] = await Promise.all([
-        occurrencesQuery,
-        studentsQuery,
-      ]);
 
       // Process all chart data from the single occurrences query
 
