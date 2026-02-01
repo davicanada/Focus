@@ -754,7 +754,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
 
   const topStudentsChartOption = {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-    grid: { left: '3%', right: '15%', bottom: '3%', top: '3%', containLabel: true },
+    grid: { left: '3%', right: '15%', bottom: 5, top: 5, containLabel: true },
     xAxis: { type: 'value', show: false },
     yAxis: {
       type: 'category',

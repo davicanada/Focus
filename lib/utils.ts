@@ -202,7 +202,7 @@ export const CHART_COLORS = {
   educationLevel: {
     infantil: '#a855f7',       // Purple 500
     fundamental_i: '#3b82f6',  // Blue 500
-    fundamental_ii: '#0ea5e9', // Sky 500
+    fundamental_ii: '#2E5A8E', // Custom dark blue
     medio: '#14b8a6',          // Teal 500
   },
 
