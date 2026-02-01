@@ -332,16 +332,16 @@ export default function ViewerRelatorioAlunoPage() {
           fillColor: [30, 58, 95],
           textColor: 255,
           fontStyle: 'bold',
-          fontSize: 9,
+          fontSize: 10,
         },
         styles: {
-          fontSize: 8,
-          cellPadding: 3,
+          fontSize: 9,
+          cellPadding: 4,
         },
         columnStyles: {
-          0: { cellWidth: 22 },
-          1: { cellWidth: 30 },
-          2: { cellWidth: 22 },
+          0: { cellWidth: 25 },
+          1: { cellWidth: 45 },
+          2: { cellWidth: 28 },
           3: { cellWidth: 'auto' },
         },
         didParseCell: (data) => {
