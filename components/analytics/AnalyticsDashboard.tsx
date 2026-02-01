@@ -702,7 +702,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
       selectedMode: 'multiple',
       label: {
         show: true,
-        formatter: '{b}\n{c} ({d}%)',
+        formatter: (params: any) => `${params.name}\n${params.value} (${Math.round(params.percent)}%)`,
         position: 'outside',
         fontSize: 12,
         lineHeight: 16,
@@ -865,7 +865,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
       selectedMode: 'multiple',
       label: {
         show: true,
-        formatter: '{b}\n{c} ({d}%)',
+        formatter: (params: any) => `${params.name}\n${params.value} (${Math.round(params.percent)}%)`,
         position: 'outside',
         fontSize: 12,
         lineHeight: 16,
@@ -910,7 +910,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
       selectedMode: 'multiple',
       label: {
         show: true,
-        formatter: '{b}\n{c} ({d}%)',
+        formatter: (params: any) => `${params.name}\n${params.value} (${Math.round(params.percent)}%)`,
         position: 'outside',
         fontSize: 12,
         lineHeight: 16,
