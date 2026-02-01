@@ -67,7 +67,7 @@ SCHEMA DO BANCO DE DADOS:
 
 4. classes (id, institution_id, name, education_level, grade, section, shift, year, is_active, deleted_at)
    - Turmas da instituicao
-   - education_level: 'infantil', 'fundamental_i', 'fundamental_ii', 'medio', 'custom'
+   - education_level: 'infantil', 'fundamental_i', 'fundamental_ii', 'medio'
    - shift: 'matutino', 'vespertino', 'noturno', 'integral'
    - name: Ex: "6 Ano A", "1 Serie B"
 

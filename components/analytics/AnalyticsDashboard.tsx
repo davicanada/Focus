@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { AIChat } from '@/components/analytics/AIChat';
 import { createClient } from '@/lib/supabase/client';
-import { getFromStorage, removeFromStorage, ANALYTICS_COLORS, cn } from '@/lib/utils';
+import { getFromStorage, removeFromStorage, ANALYTICS_COLORS, cn, getEducationLevelOrder } from '@/lib/utils';
 import { AlertTriangle, BarChart2, AlertCircle, Users } from 'lucide-react';
 import type { User, Institution } from '@/types';
 
@@ -60,7 +60,6 @@ const educationLevelLabels: Record<string, string> = {
   fundamental_i: 'Fund. I',
   fundamental_ii: 'Fund. II',
   medio: 'Ensino Medio',
-  custom: 'Outro',
 };
 
 const educationLevelKeysFromLabels: Record<string, string> = {
@@ -68,7 +67,6 @@ const educationLevelKeysFromLabels: Record<string, string> = {
   'Fund. I': 'fundamental_i',
   'Fund. II': 'fundamental_ii',
   'Ensino Medio': 'medio',
-  'Outro': 'custom',
 };
 
 // Shift labels
@@ -169,7 +167,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
   const [severityData, setSeverityData] = useState<{ name: string; value: number }[]>([]);
   const [monthlyData, setMonthlyData] = useState<{ month: string; count: number }[]>([]);
   const [topStudents, setTopStudents] = useState<{ name: string; count: number; id?: string }[]>([]);
-  const [classData, setClassData] = useState<{ name: string; count: number }[]>([]);
+  const [classData, setClassData] = useState<{ name: string; count: number; educationLevel: string }[]>([]);
   const [educationLevelData, setEducationLevelData] = useState<{ name: string; value: number }[]>([]);
   const [shiftData, setShiftData] = useState<{ name: string; value: number }[]>([]);
   const [studentsWithoutOccurrences, setStudentsWithoutOccurrences] = useState<{ id: string; name: string; className: string }[]>([]);
@@ -417,7 +415,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
       setStudentsWithoutOccurrences(withoutOccurrences);
 
       // Occurrences by class - exclude classIds filter for this chart
-      const classCount: Record<string, number> = {};
+      const classCount: Record<string, { count: number; educationLevel: string }> = {};
       allOccurrences?.forEach((r: any) => {
         if (!matchesFilter(r.occurrence_type?.category, filters.categories)) return;
         if (!matchesFilter(r.occurrence_type?.severity, filters.severities)) return;
@@ -426,13 +424,21 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         if (!matchesFilter(r.student?.class?.shift || 'nao_informado', filters.shifts)) return;
 
         const className = r.student?.class?.name || 'Sem turma';
-        classCount[className] = (classCount[className] || 0) + 1;
+        const educationLevel = r.student?.class?.education_level || 'medio';
+        if (!classCount[className]) {
+          classCount[className] = { count: 0, educationLevel };
+        }
+        classCount[className].count += 1;
       });
 
       setClassData(
         Object.entries(classCount)
-          .map(([name, count]) => ({ name, count }))
-          .sort((a, b) => a.name.localeCompare(b.name))
+          .map(([name, { count, educationLevel }]) => ({ name, count, educationLevel }))
+          .sort((a, b) => {
+            const levelDiff = getEducationLevelOrder(a.educationLevel) - getEducationLevelOrder(b.educationLevel);
+            if (levelDiff !== 0) return levelDiff;
+            return a.name.localeCompare(b.name, 'pt-BR');
+          })
       );
 
       // Education level distribution - exclude educationLevel filter for this chart
@@ -444,7 +450,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         if (!matchesFilter(r.student?.full_name, filters.studentIds)) return;
         if (!matchesFilter(r.student?.class?.shift || 'nao_informado', filters.shifts)) return;
 
-        const level = r.student?.class?.education_level || 'custom';
+        const level = r.student?.class?.education_level || 'medio';
         educationLevelCount[level] = (educationLevelCount[level] || 0) + 1;
       });
 
@@ -821,7 +827,6 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
     medio: '#153461',
     fundamental: '#4A90D9',
     infantil: '#A8D0F5',
-    custom: '#7BB3E8',
   };
   const educationLevelChartOption = {
     tooltip: { trigger: 'item' },

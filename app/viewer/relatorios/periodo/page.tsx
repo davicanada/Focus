@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
 import { ProgressLink } from '@/components/ProgressLink';
 import { createClient } from '@/lib/supabase/client';
-import { getFromStorage, removeFromStorage, formatDate } from '@/lib/utils';
+import { getFromStorage, removeFromStorage, formatDate, formatClassFullName, getEducationLevelOrder } from '@/lib/utils';
 import type { User, Institution, Quarter } from '@/types';
 
 interface OccurrenceData {
@@ -25,6 +25,8 @@ interface OccurrenceData {
     class: {
       id: string;
       name: string;
+      education_level?: string;
+      shift?: string;
     } | null;
   } | null;
   occurrence_type: {
@@ -118,31 +120,37 @@ export default function ViewerRelatorioPeriodoPage() {
   };
 
   const groupOccurrencesByClassAndStudent = (occurrences: OccurrenceData[]): GroupedData[] => {
-    const grouped: Record<string, Record<string, OccurrenceData[]>> = {};
+    const grouped: Record<string, { educationLevel: string; students: Record<string, OccurrenceData[]> }> = {};
 
     occurrences.forEach((occ) => {
-      const className = occ.student?.class?.name || 'Sem Turma';
+      const cls = occ.student?.class;
+      const className = formatClassFullName(cls?.name || 'Sem Turma', cls?.education_level, cls?.shift);
       const studentName = occ.student?.full_name || 'Aluno Desconhecido';
+      const educationLevel = cls?.education_level || 'medio';
 
       if (!grouped[className]) {
-        grouped[className] = {};
+        grouped[className] = { educationLevel, students: {} };
       }
-      if (!grouped[className][studentName]) {
-        grouped[className][studentName] = [];
+      if (!grouped[className].students[studentName]) {
+        grouped[className].students[studentName] = [];
       }
-      grouped[className][studentName].push(occ);
+      grouped[className].students[studentName].push(occ);
     });
 
-    // Convert to array and sort
+    // Convert to array and sort by education level
     const result: GroupedData[] = Object.keys(grouped)
-      .sort((a, b) => a.localeCompare(b, 'pt-BR'))
+      .sort((a, b) => {
+        const levelDiff = getEducationLevelOrder(grouped[a].educationLevel) - getEducationLevelOrder(grouped[b].educationLevel);
+        if (levelDiff !== 0) return levelDiff;
+        return a.localeCompare(b, 'pt-BR');
+      })
       .map((className) => ({
         className,
-        students: Object.keys(grouped[className])
+        students: Object.keys(grouped[className].students)
           .sort((a, b) => a.localeCompare(b, 'pt-BR'))
           .map((studentName) => ({
             studentName,
-            occurrences: grouped[className][studentName]
+            occurrences: grouped[className].students[studentName]
               .sort((a, b) => new Date(a.occurrence_date).getTime() - new Date(b.occurrence_date).getTime())
               .map((occ) => ({
                 date: formatDate(occ.occurrence_date),
@@ -175,7 +183,7 @@ export default function ViewerRelatorioPeriodoPage() {
           id,
           occurrence_date,
           description,
-          student:students(id, full_name, class:classes(id, name)),
+          student:students(id, full_name, class:classes(id, name, education_level, shift)),
           occurrence_type:occurrence_types(category, severity),
           registered_by_user:users!occurrences_registered_by_fkey(full_name)
         `)

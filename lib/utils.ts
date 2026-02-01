@@ -204,7 +204,6 @@ export const CHART_COLORS = {
     fundamental_i: '#3b82f6',  // Blue 500
     fundamental_ii: '#0ea5e9', // Sky 500
     medio: '#14b8a6',          // Teal 500
-    custom: '#6b7280',         // Gray 500
   },
 
   // === TURNO ===
@@ -249,6 +248,49 @@ export const ANALYTICS_COLORS = {
     '#D4E8FA',
   ],
 };
+
+// === ORDENAÇÃO E FORMATAÇÃO DE TURMAS ===
+
+const EDUCATION_LEVEL_ORDER: Record<string, number> = {
+  infantil: 0,
+  fundamental_i: 1,
+  fundamental_ii: 2,
+  medio: 3,
+};
+
+const EDUCATION_LEVEL_LABELS: Record<string, string> = {
+  infantil: 'Educação Infantil',
+  fundamental_i: 'Ensino Fundamental I',
+  fundamental_ii: 'Ensino Fundamental II',
+  medio: 'Ensino Médio',
+};
+
+const SHIFT_LABELS: Record<string, string> = {
+  matutino: 'Matutino',
+  vespertino: 'Vespertino',
+  noturno: 'Noturno',
+  integral: 'Integral',
+};
+
+export function getEducationLevelOrder(level: string): number {
+  return EDUCATION_LEVEL_ORDER[level] ?? 99;
+}
+
+export function formatClassFullName(name: string, educationLevel?: string, shift?: string): string {
+  const levelLabel = EDUCATION_LEVEL_LABELS[educationLevel || ''] || educationLevel || '';
+  const shiftLabel = SHIFT_LABELS[shift || ''] || shift || '';
+  if (levelLabel && shiftLabel) return `${name} - ${levelLabel} - ${shiftLabel}`;
+  if (levelLabel) return `${name} - ${levelLabel}`;
+  return name;
+}
+
+export function sortClassesByLevel<T extends { education_level?: string; name: string }>(classes: T[]): T[] {
+  return [...classes].sort((a, b) => {
+    const levelDiff = getEducationLevelOrder(a.education_level || '') - getEducationLevelOrder(b.education_level || '');
+    if (levelDiff !== 0) return levelDiff;
+    return a.name.localeCompare(b.name, 'pt-BR');
+  });
+}
 
 // Delay helper para debounce
 export function delay(ms: number): Promise<void> {

@@ -12,7 +12,7 @@ import { Select } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { ProgressLink } from '@/components/ProgressLink';
 import { createClient } from '@/lib/supabase/client';
-import { getFromStorage, removeFromStorage, formatDate } from '@/lib/utils';
+import { getFromStorage, removeFromStorage, formatDate, formatClassFullName, sortClassesByLevel } from '@/lib/utils';
 import type { User as UserType, Institution, Class, Student } from '@/types';
 
 interface OccurrenceData {
@@ -33,6 +33,8 @@ interface StudentInfo {
   enrollment_number: string | null;
   class: {
     name: string;
+    education_level?: string;
+    shift?: string;
   } | null;
 }
 
@@ -92,7 +94,7 @@ export default function ViewerRelatorioAlunoPage() {
           .order('full_name'),
       ]);
 
-      setClasses(classesRes.data || []);
+      setClasses(sortClassesByLevel(classesRes.data || []));
       setStudents(studentsRes.data || []);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -126,7 +128,7 @@ export default function ViewerRelatorioAlunoPage() {
       // Get student info
       const { data: studentData, error: studentError } = await supabase
         .from('students')
-        .select('full_name, enrollment_number, class:classes(name)')
+        .select('full_name, enrollment_number, class:classes(name, education_level, shift)')
         .eq('id', selectedStudentId)
         .single();
 
@@ -189,7 +191,7 @@ export default function ViewerRelatorioAlunoPage() {
 
     worksheet.getCell('A5').value = 'Turma:';
     worksheet.getCell('A5').font = { bold: true };
-    worksheet.getCell('B5').value = student.class?.name || '';
+    worksheet.getCell('B5').value = formatClassFullName(student.class?.name || '', student.class?.education_level, student.class?.shift);
 
     worksheet.getCell('A6').value = 'Matrícula:';
     worksheet.getCell('A6').font = { bold: true };
@@ -278,7 +280,7 @@ export default function ViewerRelatorioAlunoPage() {
     doc.setFont('helvetica', 'bold');
     doc.text('Turma:', 20, 53);
     doc.setFont('helvetica', 'normal');
-    doc.text(student.class?.name || '-', 45, 53);
+    doc.text(formatClassFullName(student.class?.name || '-', student.class?.education_level, student.class?.shift), 45, 53);
 
     doc.setFont('helvetica', 'bold');
     doc.text('Matrícula:', 100, 45);
@@ -319,13 +321,12 @@ export default function ViewerRelatorioAlunoPage() {
       // Occurrences table
       autoTable(doc, {
         startY: 92,
-        head: [['Data', 'Tipo', 'Severidade', 'Descrição', 'Registrado por']],
+        head: [['Data', 'Tipo', 'Severidade', 'Descrição']],
         body: occurrences.map((occ) => [
           formatDate(occ.occurrence_date),
           occ.occurrence_type?.category || '',
           occ.occurrence_type?.severity || '',
           occ.description || '-',
-          occ.registered_by_user?.full_name || '',
         ]),
         headStyles: {
           fillColor: [30, 58, 95],
@@ -339,10 +340,9 @@ export default function ViewerRelatorioAlunoPage() {
         },
         columnStyles: {
           0: { cellWidth: 22 },
-          1: { cellWidth: 28 },
-          2: { cellWidth: 20 },
-          3: { cellWidth: 70 },
-          4: { cellWidth: 35 },
+          1: { cellWidth: 30 },
+          2: { cellWidth: 22 },
+          3: { cellWidth: 'auto' },
         },
         didParseCell: (data) => {
           // Color severity cells
@@ -440,7 +440,7 @@ export default function ViewerRelatorioAlunoPage() {
               >
                 <option value="">Selecione uma turma...</option>
                 {classes.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <option key={c.id} value={c.id}>{formatClassFullName(c.name, c.education_level, c.shift)}</option>
                 ))}
               </Select>
             </div>

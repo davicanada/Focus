@@ -6,7 +6,7 @@ export type AccessRequestType = 'admin_new' | 'admin_existing' | 'professor' | '
 
 export type AccessRequestStatus = 'pending' | 'approved' | 'rejected';
 
-export type EducationLevel = 'infantil' | 'fundamental_i' | 'fundamental_ii' | 'medio' | 'custom';
+export type EducationLevel = 'infantil' | 'fundamental_i' | 'fundamental_ii' | 'medio';
 
 export type PeriodType = 'bimestre' | 'trimestre' | 'semestre';
 
@@ -416,7 +416,6 @@ export const EDUCATION_LEVELS: Record<EducationLevel, { label: string; allowClas
   fundamental_i: { label: 'Ensino Fundamental I', allowClassSection: true },
   fundamental_ii: { label: 'Ensino Fundamental II', allowClassSection: true },
   medio: { label: 'Ensino Medio', allowClassSection: true },
-  custom: { label: 'Outro', allowClassSection: true }
 };
 
 // Severidades de ocorrencia

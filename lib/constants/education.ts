@@ -1,4 +1,4 @@
-export type EducationStage = 'infantil' | 'fundamental_i' | 'fundamental_ii' | 'medio' | 'custom';
+export type EducationStage = 'infantil' | 'fundamental_i' | 'fundamental_ii' | 'medio';
 
 export interface EducationYear {
   code: string;
@@ -52,11 +52,6 @@ export const EDUCATION_LEVELS: Record<EducationStage, EducationLevel> = {
       { code: '4', label: '4ª série', order: 4 }
     ]
   },
-  custom: {
-    label: 'Outro',
-    allowClassSection: true,
-    years: []
-  }
 };
 
 export const SHIFTS = [
@@ -69,7 +64,7 @@ export const SHIFTS = [
 export type ShiftType = typeof SHIFTS[number]['value'];
 
 export function canHaveSection(stage: EducationStage): boolean {
-  return stage === 'fundamental_i' || stage === 'fundamental_ii' || stage === 'medio' || stage === 'custom';
+  return stage === 'fundamental_i' || stage === 'fundamental_ii' || stage === 'medio';
 }
 
 export function buildClassLabel(
@@ -87,11 +82,6 @@ export function buildClassLabel(
     const yearData = EDUCATION_LEVELS[stage].years.find(y => y.code === yearCode);
     const label = yearData?.label || yearCode;
     return section ? `${label} ${section}` : label;
-  }
-
-  // Custom: usar código diretamente
-  if (stage === 'custom') {
-    return section ? `${yearCode} ${section}` : yearCode;
   }
 
   // Fundamental e Médio: formato simplificado
