@@ -291,7 +291,8 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         .eq('institution_id', institutionId)
         .is('deleted_at', null)
         .gte('occurrence_date', startOfYear)
-        .lte('occurrence_date', endOfYear);
+        .lte('occurrence_date', endOfYear)
+        .range(0, 9999);
 
       // Query 2: All students (needed for "without occurrences" list)
       const studentsQuery = supabase
