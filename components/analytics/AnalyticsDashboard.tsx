@@ -837,6 +837,8 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
 
   const educationLevelColors: Record<string, string> = {
     medio: '#153461',
+    fundamental_ii: '#2E5A8E',
+    fundamental_i: '#4A90D9',
     fundamental: '#4A90D9',
     infantil: '#A8D0F5',
   };
