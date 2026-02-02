@@ -621,15 +621,14 @@ export default function ProfessoresPage() {
                 <Users className="h-6 w-6 text-muted-foreground" />
               </div>
               <div>
-                <h3 className="font-semibold">Como adicionar professores?</h3>
+                <h3 className="font-semibold">Como adicionar usuários?</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  <strong>Opção 1:</strong> Clique em &quot;Adicionar Professor&quot; e cadastre diretamente.
-                  O professor receberá um email com as credenciais de acesso.
+                  <strong>Opção 1:</strong> Clique em &quot;Adicionar Usuário&quot; e cadastre diretamente.
+                  O usuário receberá um email com as credenciais de acesso.
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  <strong>Opção 2:</strong> Professores podem solicitar acesso na tela de login,
-                  selecionando &quot;Professor em instituição existente&quot;.
-                  O administrador master poderá aprovar a solicitação.
+                  <strong>Opção 2:</strong> Usuários podem solicitar acesso na tela de login.
+                  O administrador poderá aprovar a solicitação.
                 </p>
               </div>
             </div>
