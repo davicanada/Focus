@@ -569,8 +569,9 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         };
       } else {
         const isSelectedAlone = currentArray.length === 1 && currentArray[0] === value;
+        const empty: FilterState = { categories: [], severities: [], months: [], classIds: [], studentIds: [], educationLevels: [], shifts: [] };
         return {
-          ...prev,
+          ...empty,
           [filterType]: isSelectedAlone ? [] : [value],
         };
       }
