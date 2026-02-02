@@ -273,6 +273,10 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         return filterArray.includes(value || '');
       };
 
+      // Month name helpers for cross-filtering
+      const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      const getMonthName = (dateStr: string): string => monthNames[new Date(dateStr).getMonth()];
+
       // OPTIMIZED: Only 2 queries instead of 6
       // Query 1: All occurrences with complete relations for the year
       // Supabase PostgREST caps at 1000 rows per request, so we paginate
@@ -329,6 +333,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         if (!matchesFilter(r.student?.full_name, filters.studentIds)) return;
         if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return;
         if (!matchesFilter(r.student?.class?.shift || 'nao_informado', filters.shifts)) return;
+        if (!matchesFilter(getMonthName(r.occurrence_date), filters.months)) return;
         const cat = r.occurrence_type?.category || 'outro';
         const sev = r.occurrence_type?.severity || 'leve';
         if (!categoryCount[cat]) {
@@ -353,6 +358,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         if (!matchesFilter(r.student?.full_name, filters.studentIds)) return;
         if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return;
         if (!matchesFilter(r.student?.class?.shift || 'nao_informado', filters.shifts)) return;
+        if (!matchesFilter(getMonthName(r.occurrence_date), filters.months)) return;
         const sev = r.occurrence_type?.severity || 'leve';
         severityCount[sev] = (severityCount[sev] || 0) + 1;
       });
@@ -365,7 +371,6 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
       );
 
       // Monthly trend (Jan-Dec of selected year) - exclude month filter for this chart
-      const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
       const months: { month: string; count: number }[] = [];
 
       // Group by month
@@ -397,6 +402,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         if (!matchesFilter(r.student?.class?.name, filters.classIds)) return;
         if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return;
         if (!matchesFilter(r.student?.class?.shift || 'nao_informado', filters.shifts)) return;
+        if (!matchesFilter(getMonthName(r.occurrence_date), filters.months)) return;
 
         const id = r.student_id;
         const name = r.student?.full_name || 'Desconhecido';
@@ -434,6 +440,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         if (!matchesFilter(r.student?.full_name, filters.studentIds)) return;
         if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return;
         if (!matchesFilter(r.student?.class?.shift || 'nao_informado', filters.shifts)) return;
+        if (!matchesFilter(getMonthName(r.occurrence_date), filters.months)) return;
 
         const className = r.student?.class?.name || 'Sem turma';
         const educationLevel = r.student?.class?.education_level || 'medio';
@@ -461,6 +468,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         if (!matchesFilter(r.student?.class?.name, filters.classIds)) return;
         if (!matchesFilter(r.student?.full_name, filters.studentIds)) return;
         if (!matchesFilter(r.student?.class?.shift || 'nao_informado', filters.shifts)) return;
+        if (!matchesFilter(getMonthName(r.occurrence_date), filters.months)) return;
 
         const level = r.student?.class?.education_level || 'medio';
         educationLevelCount[level] = (educationLevelCount[level] || 0) + 1;
@@ -481,6 +489,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         if (!matchesFilter(r.student?.class?.name, filters.classIds)) return;
         if (!matchesFilter(r.student?.full_name, filters.studentIds)) return;
         if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return;
+        if (!matchesFilter(getMonthName(r.occurrence_date), filters.months)) return;
 
         const shift = r.student?.class?.shift || 'nao_informado';
         shiftCount[shift] = (shiftCount[shift] || 0) + 1;
@@ -502,6 +511,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         if (!matchesFilter(r.student?.full_name, filters.studentIds)) return false;
         if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return false;
         if (!matchesFilter(r.student?.class?.shift || 'nao_informado', filters.shifts)) return false;
+        if (!matchesFilter(getMonthName(r.occurrence_date), filters.months)) return false;
         return true;
       });
 
