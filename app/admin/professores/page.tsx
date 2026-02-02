@@ -379,7 +379,7 @@ export default function ProfessoresPage() {
           </div>
           <Button onClick={() => handleOpenModal()}>
             <Plus className="h-4 w-4 mr-2" />
-            Adicionar Professor
+            Adicionar Usuário
           </Button>
         </div>
 

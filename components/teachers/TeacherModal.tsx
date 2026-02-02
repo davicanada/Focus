@@ -30,6 +30,7 @@ export function TeacherModal({
 }: TeacherModalProps) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [role, setRole] = useState('professor');
   const [isLoading, setIsLoading] = useState(false);
   const [emailError, setEmailError] = useState('');
 
@@ -42,6 +43,7 @@ export function TeacherModal({
     } else {
       setFullName('');
       setEmail('');
+      setRole('professor');
     }
     setEmailError('');
   }, [teacher, isOpen]);
@@ -49,6 +51,7 @@ export function TeacherModal({
   const handleClose = () => {
     setFullName('');
     setEmail('');
+    setRole('professor');
     setEmailError('');
     onClose();
   };
@@ -88,7 +91,7 @@ export function TeacherModal({
           throw new Error(data.error || 'Erro ao atualizar');
         }
 
-        toast.success('Professor atualizado com sucesso');
+        toast.success('Usuário atualizado com sucesso');
       } else {
         // Criar
         const response = await fetch('/api/teachers', {
@@ -98,6 +101,7 @@ export function TeacherModal({
             full_name: fullName.trim(),
             email: email.trim().toLowerCase(),
             institution_id: institutionId,
+            role,
           }),
         });
 
@@ -107,7 +111,7 @@ export function TeacherModal({
           throw new Error(data.error || 'Erro ao cadastrar');
         }
 
-        toast.success('Professor cadastrado! Email de boas-vindas enviado.');
+        toast.success('Usuário cadastrado! Email de boas-vindas enviado.');
       }
 
       onSuccess();
@@ -123,8 +127,8 @@ export function TeacherModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title={isEditing ? 'Editar Professor' : 'Adicionar Professor'}
-      description={isEditing ? 'Atualize os dados do professor' : 'Preencha os dados para cadastrar um novo professor'}
+      title={isEditing ? 'Editar Usuário' : 'Adicionar Usuário'}
+      description={isEditing ? 'Atualize os dados do usuário' : 'Preencha os dados para cadastrar um novo usuário'}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
@@ -133,35 +137,52 @@ export function TeacherModal({
             id="fullName"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="Nome completo do professor"
+            placeholder="Nome completo do usuário"
             disabled={isLoading}
             required
           />
         </div>
 
         {!isEditing && (
-          <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setEmailError('');
-              }}
-              placeholder="email@exemplo.com"
-              disabled={isLoading}
-              required
-              className={emailError ? 'border-destructive' : ''}
-            />
-            {emailError && (
-              <p className="text-xs text-destructive">{emailError}</p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              O professor receberá um email com instruções de acesso
-            </p>
-          </div>
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="role">Função *</Label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                disabled={isLoading}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="professor">Professor</option>
+                <option value="admin">Administrador</option>
+                <option value="admin_viewer">Visualizador</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailError('');
+                }}
+                placeholder="email@exemplo.com"
+                disabled={isLoading}
+                required
+                className={emailError ? 'border-destructive' : ''}
+              />
+              {emailError && (
+                <p className="text-xs text-destructive">{emailError}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                O usuário receberá um email com instruções de acesso
+              </p>
+            </div>
+          </>
         )}
 
         <ModalFooter>

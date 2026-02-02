@@ -54,10 +54,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Criar novo professor
+// POST - Criar novo usuário
 export async function POST(request: NextRequest) {
   try {
-    const { full_name, email, institution_id } = await request.json();
+    const { full_name, email, institution_id, role } = await request.json();
+    const validRoles = ['admin', 'professor', 'admin_viewer'];
+    const userRole = validRoles.includes(role) ? role : 'professor';
 
     // Validar dados
     if (!full_name || !email || !institution_id) {
@@ -118,7 +120,7 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: authData.user.id,
         institution_id,
-        role: 'professor',
+        role: userRole,
         is_active: true,
       });
 
@@ -142,7 +144,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       userId: authData.user.id,
-      message: 'Professor cadastrado com sucesso'
+      message: 'Usuário cadastrado com sucesso'
     });
   } catch (error) {
     console.error('Error creating teacher:', error);
