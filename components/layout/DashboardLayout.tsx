@@ -47,6 +47,7 @@ export function DashboardLayout({
         onClose={() => setSidebarOpen(false)}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        hasMultipleInstitutions={userInstitutions.filter(ui => ui.is_active).length > 1}
       />
 
       {/* Main Content - pl-0 on mobile, pl-64/pl-16 on md+ based on sidebar */}

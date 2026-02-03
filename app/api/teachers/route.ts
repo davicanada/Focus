@@ -75,76 +75,102 @@ export async function POST(request: NextRequest) {
       .eq('email', email.toLowerCase())
       .single();
 
+    let userId: string;
+    let tempPassword: string | null = null;
+
     if (existingUser) {
-      return NextResponse.json({ error: 'Email ja cadastrado no sistema' }, { status: 409 });
-    }
+      // User exists — check if already linked to this institution
+      const { data: existingLink } = await supabaseAdmin
+        .from('user_institutions')
+        .select('id')
+        .eq('user_id', existingUser.id)
+        .eq('institution_id', institution_id)
+        .is('deleted_at', null)
+        .single();
 
-    // Gerar senha temporaria
-    const tempPassword = Math.random().toString(36).slice(-8) +
-                         Math.random().toString(36).slice(-8).toUpperCase();
+      if (existingLink) {
+        return NextResponse.json({ error: 'Usuário já está vinculado a esta instituição' }, { status: 409 });
+      }
 
-    // Criar usuario no Auth
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: email.toLowerCase(),
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: { full_name }
-    });
+      userId = existingUser.id;
 
-    if (authError) {
-      console.error('Error creating auth user:', authError);
-      return NextResponse.json({ error: 'Erro ao criar usuario de autenticacao' }, { status: 500 });
-    }
+      // Reactivate user if previously deactivated
+      await supabaseAdmin
+        .from('users')
+        .update({ is_active: true, deleted_at: null, deactivation_reason: null, updated_at: new Date().toISOString() })
+        .eq('id', userId)
+        .not('deleted_at', 'is', null);
+    } else {
+      // New user — create auth + users record
+      tempPassword = Math.random().toString(36).slice(-8) +
+                           Math.random().toString(36).slice(-8).toUpperCase();
 
-    // Inserir em users
-    const { error: userError } = await supabaseAdmin
-      .from('users')
-      .insert({
-        id: authData.user.id,
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email: email.toLowerCase(),
-        full_name,
-        is_active: true,
-        is_master: false,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: { full_name }
       });
 
-    if (userError) {
-      // Rollback: deletar do Auth
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-      console.error('Error creating user:', userError);
-      return NextResponse.json({ error: 'Erro ao criar usuario' }, { status: 500 });
+      if (authError) {
+        console.error('Error creating auth user:', authError);
+        return NextResponse.json({ error: 'Erro ao criar usuario de autenticacao' }, { status: 500 });
+      }
+
+      const { error: userError } = await supabaseAdmin
+        .from('users')
+        .insert({
+          id: authData.user.id,
+          email: email.toLowerCase(),
+          full_name,
+          is_active: true,
+          is_master: false,
+        });
+
+      if (userError) {
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+        console.error('Error creating user:', userError);
+        return NextResponse.json({ error: 'Erro ao criar usuario' }, { status: 500 });
+      }
+
+      userId = authData.user.id;
     }
 
     // Inserir em user_institutions
     const { error: uiError } = await supabaseAdmin
       .from('user_institutions')
       .insert({
-        user_id: authData.user.id,
+        user_id: userId,
         institution_id,
         role: userRole,
         is_active: true,
       });
 
     if (uiError) {
-      // Rollback
-      await supabaseAdmin.from('users').delete().eq('id', authData.user.id);
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+      if (!existingUser) {
+        // Rollback only for new users
+        await supabaseAdmin.from('users').delete().eq('id', userId);
+        await supabaseAdmin.auth.admin.deleteUser(userId);
+      }
       console.error('Error creating user-institution relation:', uiError);
       return NextResponse.json({ error: 'Erro ao vincular usuario a instituicao' }, { status: 500 });
     }
 
-    // Enviar email de boas-vindas
-    try {
-      await sendWelcomeEmail(email.toLowerCase(), full_name, tempPassword);
-      console.log('Welcome email sent to:', email);
-    } catch (emailError) {
-      console.error('Error sending welcome email:', emailError);
-      // Nao falhar a operacao se o email falhar
+    // Enviar email de boas-vindas (com senha apenas para novos usuarios)
+    if (tempPassword) {
+      try {
+        await sendWelcomeEmail(email.toLowerCase(), full_name, tempPassword);
+        console.log('Welcome email sent to:', email);
+      } catch (emailError) {
+        console.error('Error sending welcome email:', emailError);
+      }
     }
 
     return NextResponse.json({
       success: true,
-      userId: authData.user.id,
-      message: 'Usuário cadastrado com sucesso'
+      userId,
+      isExistingUser: !!existingUser,
+      message: existingUser ? 'Usuário vinculado com sucesso' : 'Usuário cadastrado com sucesso'
     });
   } catch (error) {
     console.error('Error creating teacher:', error);

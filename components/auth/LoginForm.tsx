@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { createClient } from '@/lib/supabase/client';
 import { setToStorage } from '@/lib/utils';
+import { setActiveInstitution } from '@/lib/institution-context';
 import type { UserRole } from '@/types';
 
 interface LoginFormProps {
@@ -72,7 +73,7 @@ export function LoginForm({ onAccessRequest, onForgotPassword }: LoginFormProps)
         return;
       }
 
-      // 5. Get user institutions and roles
+      // 5. Get user institutions and roles (include inactive but not deleted/hidden)
       const { data: userInstitutions, error: uiError } = await supabase
         .from('user_institutions')
         .select(`
@@ -80,35 +81,49 @@ export function LoginForm({ onAccessRequest, onForgotPassword }: LoginFormProps)
           institution:institutions(*)
         `)
         .eq('user_id', authData.user.id)
-        .eq('is_active', true);
+        .is('deleted_at', null);
 
       if (uiError || !userInstitutions || userInstitutions.length === 0) {
         await supabase.auth.signOut();
         throw new Error('Você não tem acesso a nenhuma instituição');
       }
 
-      // 6. Determine the highest priority role (admin > admin_viewer > professor)
-      const hasAdminRole = userInstitutions.some((ui: { role: string }) => ui.role === 'admin');
-      const hasViewerRole = userInstitutions.some((ui: { role: string }) => ui.role === 'admin_viewer');
-      const currentRole: UserRole = hasAdminRole ? 'admin' : hasViewerRole ? 'admin_viewer' : 'professor';
-
-      // 7. Select the first institution for this role
-      const currentUserInstitution = userInstitutions.find((ui: { role: string }) => ui.role === currentRole);
-      const currentInstitution = currentUserInstitution?.institution;
-
-      // 8. Store session data
-      setToStorage('currentRole', currentRole);
+      // Store user data
       setToStorage('currentUser', userData);
-      setToStorage('currentInstitution', currentInstitution);
-      setToStorage('userInstitutions', userInstitutions);
 
-      // 9. Redirect based on role
-      toast.success(`Bem-vindo, ${userData.full_name}!`);
-      router.push(
-        currentRole === 'admin' ? '/admin' :
-        currentRole === 'admin_viewer' ? '/viewer' :
-        '/professor'
-      );
+      // Filter: accessible = not hidden; active accessible = active + not hidden
+      const accessible = userInstitutions.filter((ui: { hidden_at: string | null }) => !ui.hidden_at);
+      const activeAccessible = accessible.filter((ui: { is_active: boolean }) => ui.is_active);
+
+      // If multiple active accessible institutions → go to selection screen
+      if (activeAccessible.length > 1 || (activeAccessible.length >= 1 && accessible.length > activeAccessible.length)) {
+        toast.success(`Bem-vindo, ${userData.full_name}!`);
+        router.push('/select-institution');
+        return;
+      }
+
+      // Single active accessible institution → go directly
+      if (activeAccessible.length === 1) {
+        const link = activeAccessible[0];
+        const currentRole: UserRole = link.role;
+
+        setActiveInstitution(link.institution_id, currentRole);
+        setToStorage('currentRole', currentRole);
+        setToStorage('currentInstitution', link.institution);
+        setToStorage('userInstitutions', activeAccessible);
+
+        toast.success(`Bem-vindo, ${userData.full_name}!`);
+        router.push(
+          currentRole === 'admin' ? '/admin' :
+          currentRole === 'admin_viewer' ? '/viewer' :
+          '/professor'
+        );
+        return;
+      }
+
+      // No active institutions at all
+      await supabase.auth.signOut();
+      throw new Error('Você não tem acesso ativo a nenhuma instituição. Entre em contato com o administrador.');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao fazer login');
     } finally {

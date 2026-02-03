@@ -55,18 +55,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if email is already registered
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single();
+    // Check if user already has an active link to the requested institution
+    if (request_type !== 'admin_new' && institution_id) {
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .single();
 
-    if (existingUser) {
-      return NextResponse.json(
-        { error: 'Este email já está cadastrado no sistema' },
-        { status: 400 }
-      );
+      if (existingUser) {
+        const { data: existingLink } = await supabase
+          .from('user_institutions')
+          .select('id')
+          .eq('user_id', existingUser.id)
+          .eq('institution_id', institution_id)
+          .is('deleted_at', null)
+          .single();
+
+        if (existingLink) {
+          return NextResponse.json(
+            { error: 'Este email já está vinculado a esta instituição' },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     // Generate verification token

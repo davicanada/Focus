@@ -52,6 +52,8 @@ export interface UserInstitution {
   is_active: boolean;
   // Soft delete fields
   deleted_at?: string;
+  // User can hide inactive institutions from selection screen
+  hidden_at?: string;
   created_at: string;
 }
 

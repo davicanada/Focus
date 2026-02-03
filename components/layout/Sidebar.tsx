@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Bell,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { FocusLogo } from '@/components/FocusLogo';
 import { ProgressLink } from '@/components/ProgressLink';
@@ -31,6 +32,7 @@ interface SidebarProps {
   onClose?: () => void;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
+  hasMultipleInstitutions?: boolean;
 }
 
 interface NavItem {
@@ -73,7 +75,7 @@ const viewerNavItems: NavItem[] = [
   { href: '/viewer/configuracoes', label: 'Configurações', icon: Settings },
 ];
 
-export function Sidebar({ role, institutionName, isOpen = false, onClose, collapsed = false, onToggleCollapse }: SidebarProps) {
+export function Sidebar({ role, institutionName, isOpen = false, onClose, collapsed = false, onToggleCollapse, hasMultipleInstitutions = false }: SidebarProps) {
   const pathname = usePathname();
   const [unreadAlerts, setUnreadAlerts] = useState(0);
 
@@ -196,7 +198,18 @@ export function Sidebar({ role, institutionName, isOpen = false, onClose, collap
         {(!collapsed || isOpen) && institutionName && (
           <div className="border-b border-sidebar-border px-4 py-3">
             <p className="text-xs text-sidebar-foreground/60">Instituição</p>
-            <p className="text-sm font-medium break-words">{institutionName}</p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-medium break-words flex-1">{institutionName}</p>
+              {hasMultipleInstitutions && (
+                <ProgressLink
+                  href="/select-institution"
+                  onClick={handleNavClick}
+                  className="rounded-md p-1 hover:bg-sidebar-accent transition-colors flex-shrink-0"
+                >
+                  <ArrowLeftRight className="h-3.5 w-3.5 text-sidebar-foreground/60" />
+                </ProgressLink>
+              )}
+            </div>
           </div>
         )}
 
