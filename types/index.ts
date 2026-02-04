@@ -4,6 +4,23 @@ export type UserRole = 'master' | 'admin' | 'professor' | 'admin_viewer';
 
 export type AccessRequestType = 'admin_new' | 'admin_existing' | 'professor' | 'admin_viewer';
 
+// Tipos para sistema de devolutivas
+export type OccurrenceStatus = 'pending' | 'in_progress' | 'resolved';
+
+export type FeedbackActionType =
+  | 'student_talk'
+  | 'guardian_contact'
+  | 'verbal_warning'
+  | 'written_warning'
+  | 'coordination_referral'
+  | 'direction_referral'
+  | 'psychologist_referral'
+  | 'suspension'
+  | 'mediation'
+  | 'observation'
+  | 'resolved'
+  | 'other';
+
 export type AccessRequestStatus = 'pending' | 'approved' | 'rejected';
 
 export type EducationLevel = 'infantil' | 'fundamental_i' | 'fundamental_ii' | 'medio';
@@ -116,6 +133,7 @@ export interface Occurrence {
   registered_by: string;
   occurrence_date: string;
   description?: string;
+  status: OccurrenceStatus; // Status da devolutiva: pending, in_progress, resolved
   class_id_at_occurrence?: string; // Turma do aluno no momento da ocorrência (preserva histórico)
   // Soft delete fields
   deleted_at?: string;
@@ -127,6 +145,19 @@ export interface Occurrence {
   occurrence_type?: OccurrenceType;
   registered_by_user?: User;
   class_at_occurrence?: Class; // JOIN opcional com a turma histórica
+  feedbacks?: OccurrenceFeedback[]; // Devolutivas da ocorrência
+}
+
+export interface OccurrenceFeedback {
+  id: string;
+  occurrence_id: string;
+  action_type: FeedbackActionType;
+  description?: string;
+  performed_by: string;
+  performed_at: string;
+  created_at: string;
+  // Relacionamentos opcionais
+  performer?: User;
 }
 
 export interface Quarter {
