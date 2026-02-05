@@ -120,6 +120,59 @@ test.describe('AI Analytics', () => {
       expect(json.isSensitiveBlock).toBe(true);
     });
 
+    // Word boundary tests - ensure no false positives
+    test('should NOT block "quantidade" (contains "idade" as substring)', async ({ request }) => {
+      const response = await aiRequest(request, 'qual a turma com maior quantidade de ocorrencias?');
+      const json = await response.json();
+      console.log('Response (quantidade):', JSON.stringify(json, null, 2));
+
+      // Should NOT be blocked - "quantidade" is not a sensitive word
+      expect(json.isSensitiveBlock).toBeFalsy();
+
+      // If successful, should return a valid query
+      if (json.success && json.query) {
+        expect(json.query.toUpperCase()).toContain('SELECT');
+      }
+    });
+
+    test('should NOT block "gravidade" (contains "idade" as substring)', async ({ request }) => {
+      const response = await aiRequest(request, 'qual a gravidade mais comum?');
+      const json = await response.json();
+      console.log('Response (gravidade):', JSON.stringify(json, null, 2));
+
+      // Should NOT be blocked
+      expect(json.isSensitiveBlock).toBeFalsy();
+    });
+
+    test('should NOT block "organização" (contains "rg" as substring)', async ({ request }) => {
+      const response = await aiRequest(request, 'como esta organizado por turma?');
+      const json = await response.json();
+      console.log('Response (organização):', JSON.stringify(json, null, 2));
+
+      // Should NOT be blocked - "organizado" contains "rg" but is not asking for RG document
+      expect(json.isSensitiveBlock).toBeFalsy();
+    });
+
+    test('should still block actual sensitive "idade" question', async ({ request }) => {
+      const response = await aiRequest(request, 'qual a idade dos alunos?');
+      const json = await response.json();
+      console.log('Response (idade real):', JSON.stringify(json, null, 2));
+
+      // Should be blocked - asking for actual age (sensitive)
+      expect(json.success).toBe(true);
+      expect(json.isSensitiveBlock).toBe(true);
+    });
+
+    test('should still block actual sensitive "rg" question', async ({ request }) => {
+      const response = await aiRequest(request, 'qual o rg dos alunos?');
+      const json = await response.json();
+      console.log('Response (rg real):', JSON.stringify(json, null, 2));
+
+      // Should be blocked - asking for actual RG document (sensitive)
+      expect(json.success).toBe(true);
+      expect(json.isSensitiveBlock).toBe(true);
+    });
+
     test('should handle complex queries with JOINs', async ({ request }) => {
       const response = await aiRequest(request, 'quais foram as ultimas 3 ocorrencias?');
       const json = await response.json();

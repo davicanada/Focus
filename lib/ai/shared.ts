@@ -252,16 +252,31 @@ export function containsSensitiveColumns(query: string): boolean {
   return false;
 }
 
+// Helper to escape special regex characters
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Helper to check if keyword matches as a whole word (not as substring)
+// This prevents "quantidade" from matching "idade", "organização" from matching "rg", etc.
+function matchesKeywordWithBoundary(text: string, keyword: string): boolean {
+  // Use word boundaries (\b) to match whole words only
+  const regex = new RegExp(`\\b${escapeRegex(keyword)}\\b`, 'i');
+  return regex.test(text);
+}
+
 // Check if question is asking for sensitive data
+// Uses word boundaries to avoid false positives (e.g., "quantidade" should NOT match "idade")
 export function isSensitiveQuestion(question: string): boolean {
   const lower = question.toLowerCase();
-  return SENSITIVE_KEYWORDS.some(keyword => lower.includes(keyword));
+  return SENSITIVE_KEYWORDS.some(keyword => matchesKeywordWithBoundary(lower, keyword));
 }
 
 // Check if question contains judgmental/prejudicial language about students
+// Uses word boundaries for consistency, though compound phrases are less prone to false positives
 export function isJudgmentalQuestion(question: string): boolean {
   const lower = question.toLowerCase();
-  return JUDGMENTAL_KEYWORDS.some(keyword => lower.includes(keyword));
+  return JUDGMENTAL_KEYWORDS.some(keyword => matchesKeywordWithBoundary(lower, keyword));
 }
 
 // Get natural response for judgmental questions (ECA Art. 17)
