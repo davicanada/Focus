@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { PlusCircle, List, ClipboardList, TrendingUp } from 'lucide-react';
+import { PlusCircle, List, ClipboardList, TrendingUp, MessageSquare, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { QuickActionCard } from '@/components/dashboard/QuickActionCard';
@@ -12,7 +12,9 @@ import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
 import { createClient } from '@/lib/supabase/client';
 import { getFromStorage, removeFromStorage, formatDateTime } from '@/lib/utils';
-import type { User, Institution, UserInstitution } from '@/types';
+import { OCCURRENCE_STATUS, FEEDBACK_ACTION_TYPES } from '@/lib/constants/feedback';
+import type { User, Institution, UserInstitution, OccurrenceStatus, FeedbackActionType } from '@/types';
+import Link from 'next/link';
 
 export default function ProfessorDashboardPage() {
   const router = useRouter();
@@ -31,6 +33,29 @@ export default function ProfessorDashboardPage() {
     studentsCount: 0,
   });
   const [recentOccurrences, setRecentOccurrences] = useState<any[]>([]);
+
+  // Feedback summary
+  const [feedbackSummary, setFeedbackSummary] = useState<{
+    total_occurrences: number;
+    pending: number;
+    in_progress: number;
+    resolved: number;
+    recent_updates: Array<{
+      occurrence_id: string;
+      student_name: string;
+      class_name: string;
+      occurrence_type: string;
+      status: OccurrenceStatus;
+      last_feedback_at: string | null;
+      last_feedback_type: FeedbackActionType | null;
+    }>;
+  }>({
+    total_occurrences: 0,
+    pending: 0,
+    in_progress: 0,
+    resolved: 0,
+    recent_updates: []
+  });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -131,6 +156,17 @@ export default function ProfessorDashboardPage() {
       });
 
       setRecentOccurrences(recentRes.data || []);
+
+      // Carregar resumo de devolutivas
+      try {
+        const feedbackRes = await fetch('/api/professor/feedback-summary');
+        if (feedbackRes.ok) {
+          const feedbackData = await feedbackRes.json();
+          setFeedbackSummary(feedbackData);
+        }
+      } catch (fbError) {
+        console.error('Error loading feedback summary:', fbError);
+      }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     }
@@ -232,6 +268,100 @@ export default function ProfessorDashboardPage() {
             icon={List}
           />
         </div>
+
+        {/* Minhas Devolutivas */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Minhas Devolutivas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Cards de resumo */}
+            <div className="grid gap-4 grid-cols-2 md:grid-cols-4 mb-6">
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <p className="text-2xl font-bold">{feedbackSummary.total_occurrences}</p>
+                <p className="text-sm text-muted-foreground">Registradas</p>
+              </div>
+              <div className="bg-yellow-50 rounded-lg p-4 text-center">
+                <p className="text-2xl font-bold text-yellow-700">{feedbackSummary.pending}</p>
+                <p className="text-sm text-yellow-600">Pendentes</p>
+              </div>
+              <div className="bg-blue-50 rounded-lg p-4 text-center">
+                <p className="text-2xl font-bold text-blue-700">{feedbackSummary.in_progress}</p>
+                <p className="text-sm text-blue-600">Em andamento</p>
+              </div>
+              <div className="bg-green-50 rounded-lg p-4 text-center">
+                <p className="text-2xl font-bold text-green-700">{feedbackSummary.resolved}</p>
+                <p className="text-sm text-green-600">Resolvidas</p>
+              </div>
+            </div>
+
+            {/* Últimas atualizações */}
+            {feedbackSummary.recent_updates.length > 0 ? (
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">Últimas Atualizações</h3>
+                <div className="space-y-3">
+                  {feedbackSummary.recent_updates.map((update) => {
+                    const statusInfo = OCCURRENCE_STATUS[update.status];
+                    const feedbackInfo = update.last_feedback_type ? FEEDBACK_ACTION_TYPES[update.last_feedback_type] : null;
+
+                    return (
+                      <div
+                        key={update.occurrence_id}
+                        className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
+                      >
+                        <div className="flex items-center gap-3">
+                          {update.status === 'resolved' ? (
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                          ) : update.status === 'in_progress' ? (
+                            <Clock className="h-5 w-5 text-blue-500" />
+                          ) : (
+                            <AlertCircle className="h-5 w-5 text-yellow-500" />
+                          )}
+                          <div>
+                            <p className="font-medium text-sm">
+                              {update.student_name}
+                              {update.class_name && (
+                                <span className="text-muted-foreground font-normal"> ({update.class_name})</span>
+                              )}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {update.occurrence_type} → {statusInfo?.label}
+                              {feedbackInfo && (
+                                <span className="ml-1">• {feedbackInfo.label}</span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge className={`${statusInfo?.bgClass} ${statusInfo?.textClass}`}>
+                          {statusInfo?.label}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : feedbackSummary.total_occurrences > 0 ? (
+              <p className="text-center text-muted-foreground py-4">
+                Nenhuma atualização recente nas suas ocorrências
+              </p>
+            ) : null}
+
+            {/* Link para ver todas */}
+            {feedbackSummary.total_occurrences > 0 && (
+              <div className="mt-4 text-center">
+                <Link
+                  href="/professor/ocorrencias"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Ver todas as ocorrências →
+                </Link>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Quick Actions */}
         <div>

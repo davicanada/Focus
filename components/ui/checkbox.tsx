@@ -31,16 +31,16 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         />
         <span
           className={cn(
-            'pointer-events-none h-4 w-4 shrink-0 rounded-sm border ring-offset-background',
+            'pointer-events-none h-5 w-5 shrink-0 rounded border-2 ring-offset-background',
             'peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2',
             'flex items-center justify-center transition-colors',
             checked
-              ? 'bg-primary border-primary text-primary-foreground'
-              : 'border-input bg-background',
+              ? 'bg-primary border-primary'
+              : 'border-gray-400 bg-white',
             className
           )}
         >
-          {checked && <Check className="h-3 w-3 text-primary-foreground" />}
+          {checked && <Check className="h-4 w-4 text-white stroke-[3]" />}
         </span>
       </span>
     );

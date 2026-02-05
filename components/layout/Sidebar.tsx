@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Bell,
   ArrowLeftRight,
+  MessageSquareReply,
 } from 'lucide-react';
 import { FocusLogo } from '@/components/FocusLogo';
 import { ProgressLink } from '@/components/ProgressLink';
@@ -54,6 +55,7 @@ const adminNavItems: NavItem[] = [
   { href: '/admin/tipos-ocorrencias', label: 'Tipos de Ocorrências', icon: ClipboardList },
   { href: '/admin/trimestres', label: 'Períodos', icon: Calendar },
   { href: '/admin/anos-letivos', label: 'Anos Letivos', icon: CalendarRange },
+  { href: '/admin/ocorrencias', label: 'Ocorrências', icon: MessageSquareReply },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/admin/relatorios', label: 'Relatórios', icon: FileSpreadsheet },
   { href: '/admin/alertas', label: 'Alertas', icon: Bell },
@@ -69,6 +71,7 @@ const professorNavItems: NavItem[] = [
 
 const viewerNavItems: NavItem[] = [
   { href: '/viewer', label: 'Visão Geral', icon: LayoutDashboard },
+  { href: '/viewer/ocorrencias', label: 'Ocorrências', icon: MessageSquareReply },
   { href: '/viewer/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/viewer/relatorios', label: 'Relatórios', icon: FileSpreadsheet },
   { href: '/viewer/alertas', label: 'Alertas', icon: Bell },

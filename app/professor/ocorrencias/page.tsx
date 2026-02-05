@@ -18,10 +18,12 @@ import { Spinner } from '@/components/ui/spinner';
 import { createClient } from '@/lib/supabase/client';
 import { getFromStorage, removeFromStorage, formatDateTime, createBrazilDateTimeISO } from '@/lib/utils';
 import type { User, Institution, Class, Occurrence, OccurrenceType } from '@/types';
+import { OccurrenceStatusBadge, OccurrenceDetailModal } from '@/components/occurrences';
 
-interface OccurrenceWithRelations extends Omit<Occurrence, 'student' | 'occurrence_type'> {
+interface OccurrenceWithRelations extends Omit<Occurrence, 'student' | 'occurrence_type' | 'class_at_occurrence'> {
   student?: { full_name: string; class?: { name: string; education_level?: string } };
   occurrence_type?: { category: string; severity: string };
+  class_at_occurrence?: { name: string };
 }
 
 export default function MinhasOcorrenciasPage() {
@@ -40,6 +42,7 @@ export default function MinhasOcorrenciasPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterClass, setFilterClass] = useState('');
   const [filterSeverity, setFilterSeverity] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
 
   // View Modal
   const [selectedOccurrence, setSelectedOccurrence] = useState<OccurrenceWithRelations | null>(null);
@@ -129,7 +132,8 @@ export default function MinhasOcorrenciasPage() {
         .select(`
           *,
           student:students(full_name, class:classes(name, education_level)),
-          occurrence_type:occurrence_types(category, severity)
+          occurrence_type:occurrence_types(category, severity),
+          class_at_occurrence:classes!occurrences_class_id_at_occurrence_fkey(name)
         `)
         .eq('institution_id', institutionId)
         .eq('registered_by', userId)
@@ -247,7 +251,8 @@ export default function MinhasOcorrenciasPage() {
     const matchesSearch = occurrence.student?.full_name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesClass = !filterClass || occurrence.student?.class?.name === classes.find(c => c.id === filterClass)?.name;
     const matchesSeverity = !filterSeverity || occurrence.occurrence_type?.severity === filterSeverity;
-    return matchesSearch && matchesClass && matchesSeverity;
+    const matchesStatus = !filterStatus || occurrence.status === filterStatus;
+    return matchesSearch && matchesClass && matchesSeverity && matchesStatus;
   });
 
   if (isLoading) {
@@ -314,6 +319,16 @@ export default function MinhasOcorrenciasPage() {
                 <option value="media">Média</option>
                 <option value="grave">Grave</option>
               </Select>
+              <Select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="w-40"
+              >
+                <option value="">Todos status</option>
+                <option value="pending">Pendente</option>
+                <option value="in_progress">Em andamento</option>
+                <option value="resolved">Resolvida</option>
+              </Select>
             </div>
           </CardContent>
         </Card>
@@ -354,6 +369,7 @@ export default function MinhasOcorrenciasPage() {
                     <TableHead>Turma</TableHead>
                     <TableHead>Tipo</TableHead>
                     <TableHead>Severidade</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -372,12 +388,15 @@ export default function MinhasOcorrenciasPage() {
                         {getSeverityBadge(occurrence.occurrence_type?.severity || 'leve')}
                       </TableCell>
                       <TableCell>
+                        <OccurrenceStatusBadge status={occurrence.status || 'pending'} />
+                      </TableCell>
+                      <TableCell>
                         <div className="flex gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => setSelectedOccurrence(occurrence)}
-                            title="Ver detalhes"
+                            title="Ver detalhes e devolutivas"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -412,50 +431,20 @@ export default function MinhasOcorrenciasPage() {
         </Card>
       </div>
 
-      {/* Details Modal */}
-      <Modal
+      {/* Details Modal with Timeline */}
+      <OccurrenceDetailModal
         isOpen={!!selectedOccurrence}
         onClose={() => setSelectedOccurrence(null)}
-        title="Detalhes da Ocorrência"
-      >
-        {selectedOccurrence && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Aluno</p>
-                <p className="font-medium">{selectedOccurrence.student?.full_name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Turma</p>
-                <p className="font-medium">{selectedOccurrence.student?.class?.name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Data</p>
-                <p className="font-medium">{formatDateTime(selectedOccurrence.occurrence_date)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Tipo</p>
-                <p className="font-medium">{selectedOccurrence.occurrence_type?.category}</p>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              {getSeverityBadge(selectedOccurrence.occurrence_type?.severity || 'leve')}
-            </div>
-
-            {selectedOccurrence.description && (
-              <div>
-                <p className="text-sm text-muted-foreground">Descrição</p>
-                <p className="mt-1 p-3 bg-muted rounded-md">{selectedOccurrence.description}</p>
-              </div>
-            )}
-
-            <ModalFooter>
-              <Button onClick={() => setSelectedOccurrence(null)}>Fechar</Button>
-            </ModalFooter>
-          </div>
-        )}
-      </Modal>
+        occurrence={selectedOccurrence ? {
+          id: selectedOccurrence.id,
+          occurrence_date: selectedOccurrence.occurrence_date,
+          description: selectedOccurrence.description,
+          status: selectedOccurrence.status || 'pending',
+          student: selectedOccurrence.student,
+          class_at_occurrence: selectedOccurrence.class_at_occurrence || selectedOccurrence.student?.class,
+          occurrence_type: selectedOccurrence.occurrence_type
+        } : null}
+      />
 
       {/* Edit Modal */}
       <Modal

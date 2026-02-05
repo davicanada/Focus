@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, User, FileSpreadsheet, FileText } from 'lucide-react';
+import { Calendar, User, FileSpreadsheet, FileText, MessageSquareReply } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
@@ -36,6 +36,19 @@ const reportTypes = [
       'Depois selecione o aluno',
       'Histórico completo de ocorrências',
       'Ideal para acompanhamento individual',
+    ],
+  },
+  {
+    id: 'devolutiva',
+    title: 'Relatório de Devolutiva',
+    description: 'Análise das devolutivas registradas nas ocorrências. Mostra quais ocorrências receberam feedback e por quem.',
+    icon: MessageSquareReply,
+    color: 'bg-purple-100 text-purple-700',
+    features: [
+      'Ocorrências com e sem devolutiva',
+      'Professor que registrou cada ocorrência',
+      'Taxa de resposta da instituição',
+      'Status de acompanhamento',
     ],
   },
 ];
