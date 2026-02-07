@@ -97,8 +97,16 @@ export async function POST(
       );
     }
 
-    // Verificar se o tipo de ação é válido
-    if (!FEEDBACK_ACTION_TYPES[action_type as FeedbackActionType]) {
+    // Verificar se o tipo de ação existe no banco (padrão ou personalizado)
+    const { data: validActionType } = await supabase
+      .from('feedback_action_types')
+      .select('id, name')
+      .eq('institution_id', userInstitution.institution_id)
+      .eq('name', action_type)
+      .eq('is_active', true)
+      .single();
+
+    if (!validActionType) {
       return NextResponse.json(
         { error: 'Tipo de ação inválido' },
         { status: 400 }
