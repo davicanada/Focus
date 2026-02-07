@@ -347,6 +347,18 @@ export function createBrazilDateTimeISO(dateStr: string, timeStr: string): strin
   return `${dateStr}T${timeStr}:00-03:00`;
 }
 
+// === MODO ADMIN (Professor Mode) ===
+export const ADMIN_MODE_KEY = 'focus_admin_mode';
+export type AdminMode = 'admin' | 'professor';
+
+export function getAdminMode(): AdminMode {
+  return getFromStorage<AdminMode>(ADMIN_MODE_KEY, 'admin');
+}
+
+export function setAdminMode(mode: AdminMode): void {
+  setToStorage(ADMIN_MODE_KEY, mode);
+}
+
 // Ano letivo atual (considerando que ano letivo comeca em fevereiro)
 export function getCurrentAcademicYear(): number {
   const now = new Date();

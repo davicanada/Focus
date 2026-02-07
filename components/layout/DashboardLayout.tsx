@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { BottomNav } from './BottomNav';
-import { cn } from '@/lib/utils';
+import { cn, getAdminMode, setAdminMode, type AdminMode } from '@/lib/utils';
 import type { UserRole, Institution, UserInstitution } from '@/types';
 
 interface DashboardLayoutProps {
@@ -36,6 +36,24 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [adminMode, setAdminModeState] = useState<AdminMode>('admin');
+
+  // Load admin mode from localStorage on mount
+  useEffect(() => {
+    if (currentRole === 'admin') {
+      const savedMode = getAdminMode();
+      setAdminModeState(savedMode);
+    }
+  }, [currentRole]);
+
+  // Handle admin mode change
+  const handleAdminModeChange = (mode: AdminMode) => {
+    setAdminModeState(mode);
+    setAdminMode(mode);
+  };
+
+  // Determine if BottomNav should be shown (professor OR admin in professor mode)
+  const showBottomNav = currentRole === 'professor' || (currentRole === 'admin' && adminMode === 'professor');
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -48,14 +66,16 @@ export function DashboardLayout({
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         hasMultipleInstitutions={userInstitutions.filter(ui => ui.is_active).length > 1}
+        adminMode={adminMode}
+        onAdminModeChange={handleAdminModeChange}
       />
 
       {/* Main Content - pl-0 on mobile, pl-64/pl-16 on md+ based on sidebar */}
-      {/* pb-20 on mobile if professor (for bottom nav) */}
+      {/* pb-20 on mobile if showing bottom nav */}
       <div className={cn(
         "transition-all duration-300",
         sidebarCollapsed ? "pl-0 md:pl-16" : "pl-0 md:pl-64", // Responsive to sidebar collapse
-        currentRole === 'professor' && "pb-20 md:pb-6" // Mobile: padded for bottom nav
+        showBottomNav && "pb-20 md:pb-6" // Mobile: padded for bottom nav
       )}>
         {/* Top Bar */}
         <TopBar
@@ -78,8 +98,8 @@ export function DashboardLayout({
         </main>
       </div>
 
-      {/* Bottom Nav - Mobile only, Professor only */}
-      {currentRole === 'professor' && <BottomNav />}
+      {/* Bottom Nav - Mobile only, Professor OR Admin in professor mode */}
+      {showBottomNav && <BottomNav role={currentRole} adminMode={adminMode} />}
     </div>
   );
 }

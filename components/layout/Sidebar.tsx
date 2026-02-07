@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { FocusLogo } from '@/components/FocusLogo';
 import { ProgressLink } from '@/components/ProgressLink';
-import { cn } from '@/lib/utils';
+import { cn, getAdminMode, setAdminMode, type AdminMode } from '@/lib/utils';
 import type { UserRole } from '@/types';
 
 interface SidebarProps {
@@ -34,6 +34,8 @@ interface SidebarProps {
   collapsed?: boolean;
   onToggleCollapse?: () => void;
   hasMultipleInstitutions?: boolean;
+  adminMode?: AdminMode;
+  onAdminModeChange?: (mode: AdminMode) => void;
 }
 
 interface NavItem {
@@ -78,7 +80,15 @@ const viewerNavItems: NavItem[] = [
   { href: '/viewer/configuracoes', label: 'Configurações', icon: Settings },
 ];
 
-export function Sidebar({ role, institutionName, isOpen = false, onClose, collapsed = false, onToggleCollapse, hasMultipleInstitutions = false }: SidebarProps) {
+// Nav items for admin in professor mode (same routes as admin, but limited menu)
+const adminProfessorModeNavItems: NavItem[] = [
+  { href: '/admin', label: 'Visão Geral', icon: LayoutDashboard },
+  { href: '/admin/registrar', label: 'Registrar Ocorrência', icon: PlusCircle },
+  { href: '/admin/ocorrencias/minhas', label: 'Minhas Ocorrências', icon: List },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+];
+
+export function Sidebar({ role, institutionName, isOpen = false, onClose, collapsed = false, onToggleCollapse, hasMultipleInstitutions = false, adminMode = 'admin', onAdminModeChange }: SidebarProps) {
   const pathname = usePathname();
   const [unreadAlerts, setUnreadAlerts] = useState(0);
 
@@ -128,6 +138,10 @@ export function Sidebar({ role, institutionName, isOpen = false, onClose, collap
       case 'master':
         return masterNavItems;
       case 'admin':
+        // If in professor mode, show simplified menu
+        if (adminMode === 'professor') {
+          return adminProfessorModeNavItems;
+        }
         // Add badge to alerts item
         return adminNavItems.map(item =>
           item.href === '/admin/alertas' && unreadAlerts > 0
@@ -212,6 +226,37 @@ export function Sidebar({ role, institutionName, isOpen = false, onClose, collap
                   <ArrowLeftRight className="h-3.5 w-3.5 text-sidebar-foreground/60" />
                 </ProgressLink>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Admin Mode Toggle */}
+        {role === 'admin' && (!collapsed || isOpen) && (
+          <div className="border-b border-sidebar-border px-4 py-3">
+            <p className="text-xs text-sidebar-foreground/60 mb-2">Modo de Visualização</p>
+            <div className="flex rounded-lg bg-sidebar-accent/50 p-1">
+              <button
+                onClick={() => onAdminModeChange?.('admin')}
+                className={cn(
+                  'flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
+                  adminMode === 'admin'
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
+                    : 'text-sidebar-foreground/70 hover:text-sidebar-foreground'
+                )}
+              >
+                Gestão
+              </button>
+              <button
+                onClick={() => onAdminModeChange?.('professor')}
+                className={cn(
+                  'flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
+                  adminMode === 'professor'
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
+                    : 'text-sidebar-foreground/70 hover:text-sidebar-foreground'
+                )}
+              >
+                Ocorrências
+              </button>
             </div>
           </div>
         )}
