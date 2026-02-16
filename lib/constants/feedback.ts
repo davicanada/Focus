@@ -13,8 +13,12 @@ export const FEEDBACK_ACTION_TYPES: Record<FeedbackActionType, { label: string; 
   suspension: { label: 'Suspensão', icon: 'UserX' },
   mediation: { label: 'Mediação de conflito', icon: 'Users' },
   observation: { label: 'Observação/Acompanhamento', icon: 'Eye' },
-  resolved: { label: 'Caso resolvido', icon: 'CheckCircle' },
   other: { label: 'Outra ação', icon: 'MoreHorizontal' },
+};
+
+// Mapeamento legado para feedbacks existentes com tipos removidos
+export const LEGACY_ACTION_TYPES: Record<string, { label: string; icon: string }> = {
+  resolved: { label: 'Caso resolvido', icon: 'CheckCircle' },
 };
 
 export const OCCURRENCE_STATUS: Record<OccurrenceStatus, { label: string; color: string; bgClass: string; textClass: string }> = {

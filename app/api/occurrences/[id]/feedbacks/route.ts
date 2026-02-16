@@ -1,6 +1,6 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { FEEDBACK_ACTION_TYPES } from '@/lib/constants/feedback';
+import { FEEDBACK_ACTION_TYPES, LEGACY_ACTION_TYPES } from '@/lib/constants/feedback';
 import { FeedbackActionType } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -46,7 +46,7 @@ export async function GET(
     // Adicionar label do tipo de ação
     const feedbacksWithLabels = (feedbacks || []).map(fb => ({
       ...fb,
-      action_label: FEEDBACK_ACTION_TYPES[fb.action_type as FeedbackActionType]?.label || fb.action_type
+      action_label: FEEDBACK_ACTION_TYPES[fb.action_type as FeedbackActionType]?.label || LEGACY_ACTION_TYPES[fb.action_type]?.label || fb.action_type
     }));
 
     return NextResponse.json({ feedbacks: feedbacksWithLabels });
@@ -171,7 +171,7 @@ export async function POST(
       success: true,
       feedback: {
         ...feedback,
-        action_label: FEEDBACK_ACTION_TYPES[action_type as FeedbackActionType]?.label
+        action_label: FEEDBACK_ACTION_TYPES[action_type as FeedbackActionType]?.label || LEGACY_ACTION_TYPES[action_type]?.label
       },
       new_status: newStatus
     });

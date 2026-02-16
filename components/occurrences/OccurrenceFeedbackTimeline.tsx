@@ -16,7 +16,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
-import { FEEDBACK_ACTION_TYPES } from '@/lib/constants/feedback';
+import { FEEDBACK_ACTION_TYPES, LEGACY_ACTION_TYPES } from '@/lib/constants/feedback';
 import { formatDateTime } from '@/lib/utils';
 import type { FeedbackActionType } from '@/types';
 
@@ -36,7 +36,7 @@ interface OccurrenceFeedbackTimelineProps {
   occurrenceId: string;
 }
 
-const ICON_MAP: Record<FeedbackActionType, React.ComponentType<{ className?: string }>> = {
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   student_talk: MessageCircle,
   guardian_contact: Phone,
   verbal_warning: AlertTriangle,
@@ -132,7 +132,7 @@ export function OccurrenceFeedbackTimeline({ occurrenceId }: OccurrenceFeedbackT
               <div className="flex-1 pb-4">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-medium text-sm">
-                    {feedback.action_label || FEEDBACK_ACTION_TYPES[feedback.action_type]?.label}
+                    {feedback.action_label || FEEDBACK_ACTION_TYPES[feedback.action_type]?.label || LEGACY_ACTION_TYPES[feedback.action_type]?.label}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground mb-1">

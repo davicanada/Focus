@@ -108,8 +108,7 @@ export async function POST() {
       { name: 'Suspensão', description: 'Aplicação de suspensão disciplinar', icon: 'UserX', sort_order: 8 },
       { name: 'Mediação de conflito', description: 'Mediação entre as partes envolvidas', icon: 'Users', sort_order: 9 },
       { name: 'Observação/Acompanhamento', description: 'Manter em observação e acompanhamento', icon: 'Eye', sort_order: 10 },
-      { name: 'Caso resolvido', description: 'Situação considerada resolvida', icon: 'CheckCircle', sort_order: 11 },
-      { name: 'Outra ação', description: 'Ação não listada acima', icon: 'MoreHorizontal', sort_order: 12 },
+      { name: 'Outra ação', description: 'Ação não listada acima', icon: 'MoreHorizontal', sort_order: 11 },
     ];
 
     // Buscar todas as instituições

@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
       .from('feedback_action_types')
       .select('*')
       .eq('institution_id', userInstitution.institution_id)
+      .eq('is_active', true)
       .order('sort_order', { ascending: true });
 
     if (error) {

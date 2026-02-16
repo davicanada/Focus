@@ -13,7 +13,14 @@ import { Spinner } from '@/components/ui/spinner';
 import { ProgressLink } from '@/components/ProgressLink';
 import { createClient } from '@/lib/supabase/client';
 import { getFromStorage, removeFromStorage, formatDate, formatClassFullName, sortClassesByLevel } from '@/lib/utils';
-import type { User as UserType, Institution, Class, Student } from '@/types';
+import { FEEDBACK_ACTION_TYPES, LEGACY_ACTION_TYPES } from '@/lib/constants/feedback';
+import type { User as UserType, Institution, Class, Student, FeedbackActionType } from '@/types';
+
+interface OccurrenceFeedbackData {
+  action_type: string;
+  description: string | null;
+  performed_at: string;
+}
 
 interface OccurrenceData {
   id: string;
@@ -22,10 +29,12 @@ interface OccurrenceData {
   occurrence_type: {
     category: string;
     severity: string;
+    subcategory?: { name: string } | null;
   } | null;
   registered_by_user: {
     full_name: string;
   } | null;
+  feedbacks?: OccurrenceFeedbackData[] | null;
 }
 
 interface StudentInfo {
@@ -134,17 +143,19 @@ export default function RelatorioAlunoPage() {
 
       if (studentError) throw studentError;
 
-      // Get occurrences
+      // Get occurrences with feedbacks
       const { data: occurrences, error: occError } = await supabase
         .from('occurrences')
         .select(`
           id,
           occurrence_date,
           description,
-          occurrence_type:occurrence_types(category, severity),
-          registered_by_user:users!occurrences_registered_by_fkey(full_name)
+          occurrence_type:occurrence_types(category, severity, subcategory:occurrence_subcategories(name)),
+          registered_by_user:users!occurrences_registered_by_fkey(full_name),
+          feedbacks:occurrence_feedbacks(action_type, description, performed_at)
         `)
         .eq('student_id', selectedStudentId)
+        .is('deleted_at', null)
         .order('occurrence_date', { ascending: false });
 
       if (occError) throw occError;
@@ -172,14 +183,14 @@ export default function RelatorioAlunoPage() {
     const worksheet = workbook.addWorksheet('Ficha do Aluno');
 
     // Title
-    worksheet.mergeCells('A1:E1');
+    worksheet.mergeCells('A1:G1');
     const titleCell = worksheet.getCell('A1');
     titleCell.value = 'Ficha Individual do Aluno';
     titleCell.font = { bold: true, size: 18 };
     titleCell.alignment = { horizontal: 'center' };
 
     // Institution
-    worksheet.mergeCells('A2:E2');
+    worksheet.mergeCells('A2:G2');
     const instCell = worksheet.getCell('A2');
     instCell.value = currentInstitution?.name || '';
     instCell.alignment = { horizontal: 'center' };
@@ -203,7 +214,7 @@ export default function RelatorioAlunoPage() {
 
     // Occurrences header
     const headerRow = worksheet.getRow(9);
-    headerRow.values = ['Data', 'Tipo', 'Severidade', 'Descrição', 'Registrado por'];
+    headerRow.values = ['Data', 'Tipo', 'Severidade', 'Subcategoria', 'Descrição', 'Devolutiva', 'Registrado por'];
     headerRow.font = { bold: true };
     headerRow.fill = {
       type: 'pattern',
@@ -219,15 +230,18 @@ export default function RelatorioAlunoPage() {
         formatDate(occ.occurrence_date),
         occ.occurrence_type?.category || '',
         occ.occurrence_type?.severity || '',
+        occ.occurrence_type?.subcategory?.name || '-',
         occ.description || '',
+        formatFeedbackText(occ.feedbacks),
         occ.registered_by_user?.full_name || '',
       ];
+      row.getCell(6).alignment = { wrapText: true };
     });
 
     // No occurrences message
     if (occurrences.length === 0) {
       worksheet.getCell('A10').value = 'Nenhuma ocorrência registrada';
-      worksheet.mergeCells('A10:E10');
+      worksheet.mergeCells('A10:G10');
     }
 
     // Column widths
@@ -235,7 +249,9 @@ export default function RelatorioAlunoPage() {
       { width: 12 },
       { width: 20 },
       { width: 12 },
-      { width: 50 },
+      { width: 18 },
+      { width: 40 },
+      { width: 40 },
       { width: 25 },
     ];
 
@@ -250,62 +266,104 @@ export default function RelatorioAlunoPage() {
     URL.revokeObjectURL(url);
   };
 
+  const formatFeedbackText = (feedbacks?: OccurrenceFeedbackData[] | null): string => {
+    if (!feedbacks || feedbacks.length === 0) return 'Pendente';
+    const sorted = [...feedbacks].sort((a, b) => new Date(b.performed_at).getTime() - new Date(a.performed_at).getTime());
+    return sorted.map(fb => {
+      const label = FEEDBACK_ACTION_TYPES[fb.action_type as FeedbackActionType]?.label || LEGACY_ACTION_TYPES[fb.action_type]?.label || fb.action_type;
+      return fb.description ? `${label}: ${fb.description}` : label;
+    }).join('\n');
+  };
+
   const generatePDF = async (student: StudentInfo, occurrences: OccurrenceData[]) => {
     const { jsPDF } = await import('jspdf');
     const { default: autoTable } = await import('jspdf-autotable');
 
-    const doc = new jsPDF();
+    const doc = new jsPDF({ orientation: 'landscape' });
+    const pageWidth = doc.internal.pageSize.width;
+    const pageCenter = pageWidth / 2;
 
     // Title
     doc.setFontSize(20);
     doc.setTextColor(30, 58, 95);
-    doc.text('Ficha Individual do Aluno', 105, 20, { align: 'center' });
+    doc.text('Ficha Individual do Aluno', pageCenter, 18, { align: 'center' });
 
     // Institution
     doc.setFontSize(12);
     doc.setTextColor(100);
-    doc.text(currentInstitution?.name || '', 105, 28, { align: 'center' });
+    doc.text(currentInstitution?.name || '', pageCenter, 26, { align: 'center' });
 
-    // Student info box
-    doc.setFillColor(245, 245, 245);
-    doc.roundedRect(14, 35, 182, 35, 3, 3, 'F');
-
+    // Dynamic header layout
     doc.setFontSize(11);
     doc.setTextColor(0);
+    const className = formatClassFullName(student.class?.name || '-', student.class?.education_level, student.class?.shift);
+    const classTextWidth = doc.getTextWidth(className);
+    const classLabelEnd = 45; // X after "Turma: "
+    const rightColumnStart = 160;
+    const classFitsInline = (classLabelEnd + classTextWidth) < (rightColumnStart - 5);
+
+    let boxHeight: number;
+    let y1: number, y2: number, y3: number;
+
+    if (classFitsInline) {
+      // 2-line layout: Name+Matricula | Turma+Total
+      boxHeight = 30;
+      y1 = 42; y2 = 50; y3 = 0; // y3 not used
+    } else {
+      // 3-line layout: Name+Matricula | Turma (full width) | Total+Severity+Date
+      boxHeight = 38;
+      y1 = 42; y2 = 50; y3 = 58;
+    }
+
+    doc.setFillColor(245, 245, 245);
+    doc.roundedRect(14, 33, pageWidth - 28, boxHeight, 3, 3, 'F');
+
+    // Line 1: Nome + Matrícula
     doc.setFont('helvetica', 'bold');
-    doc.text('Nome:', 20, 45);
+    doc.text('Nome:', 20, y1);
     doc.setFont('helvetica', 'normal');
-    doc.text(student.full_name, 45, 45);
+    doc.text(student.full_name, 45, y1);
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Turma:', 20, 53);
+    doc.text('Matrícula:', rightColumnStart, y1);
     doc.setFont('helvetica', 'normal');
-    doc.text(formatClassFullName(student.class?.name || '-', student.class?.education_level, student.class?.shift), 45, 53);
+    doc.text(student.enrollment_number || '-', rightColumnStart + 30, y1);
 
+    // Line 2: Turma (+ Total if inline)
     doc.setFont('helvetica', 'bold');
-    doc.text('Matrícula:', 100, 45);
+    doc.text('Turma:', 20, y2);
     doc.setFont('helvetica', 'normal');
-    doc.text(student.enrollment_number || '-', 130, 45);
+    doc.text(className, 45, y2);
 
-    doc.setFont('helvetica', 'bold');
-    doc.text('Total de Ocorrências:', 100, 53);
-    doc.setFont('helvetica', 'normal');
-    doc.text(String(occurrences.length), 160, 53);
+    if (classFitsInline) {
+      // Total on same line as Turma
+      doc.setFont('helvetica', 'bold');
+      doc.text('Total de Ocorrências:', rightColumnStart, y2);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(occurrences.length), rightColumnStart + 55, y2);
+    } else {
+      // Line 3: Total + Severity counts + Date
+      doc.setFont('helvetica', 'bold');
+      doc.text('Total de Ocorrências:', 20, y3);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(occurrences.length), 75, y3);
 
-    doc.setFont('helvetica', 'bold');
-    doc.text('Data do Relatório:', 20, 63);
-    doc.setFont('helvetica', 'normal');
-    doc.text(formatDate(new Date()), 70, 63);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Data do Relatório:', rightColumnStart, y3);
+      doc.setFont('helvetica', 'normal');
+      doc.text(formatDate(new Date()), rightColumnStart + 48, y3);
+    }
 
     // Occurrences section
+    const sectionY = 33 + boxHeight + 10;
     doc.setFontSize(14);
     doc.setTextColor(30, 58, 95);
-    doc.text('Histórico de Ocorrências', 14, 80);
+    doc.text('Histórico de Ocorrências', 14, sectionY);
 
     if (occurrences.length === 0) {
       doc.setFontSize(11);
       doc.setTextColor(100);
-      doc.text('Nenhuma ocorrência registrada para este aluno.', 14, 90);
+      doc.text('Nenhuma ocorrência registrada para este aluno.', 14, sectionY + 10);
     } else {
       // Severity summary
       const severityCounts = {
@@ -316,36 +374,40 @@ export default function RelatorioAlunoPage() {
 
       doc.setFontSize(10);
       doc.setTextColor(100);
-      doc.text(`Leves: ${severityCounts.leve} | Médias: ${severityCounts.media} | Graves: ${severityCounts.grave}`, 14, 87);
+      doc.text(`Leves: ${severityCounts.leve} | Médias: ${severityCounts.media} | Graves: ${severityCounts.grave}`, 14, sectionY + 7);
 
-      // Occurrences table
+      // Occurrences table (6 columns)
       autoTable(doc, {
-        startY: 92,
-        head: [['Data', 'Tipo', 'Severidade', 'Descrição']],
+        startY: sectionY + 12,
+        head: [['Data', 'Tipo', 'Severidade', 'Subcategoria', 'Descrição', 'Devolutiva']],
         body: occurrences.map((occ) => [
           formatDate(occ.occurrence_date),
           occ.occurrence_type?.category || '',
           occ.occurrence_type?.severity || '',
+          occ.occurrence_type?.subcategory?.name || '-',
           occ.description || '-',
+          formatFeedbackText(occ.feedbacks),
         ]),
         headStyles: {
           fillColor: [30, 58, 95],
           textColor: 255,
           fontStyle: 'bold',
-          fontSize: 10,
+          fontSize: 9,
         },
         styles: {
-          fontSize: 9,
-          cellPadding: 4,
+          fontSize: 8,
+          cellPadding: 3,
+          overflow: 'linebreak',
         },
         columnStyles: {
-          0: { cellWidth: 25 },
-          1: { cellWidth: 45 },
-          2: { cellWidth: 28 },
+          0: { cellWidth: 22 },
+          1: { cellWidth: 'auto' },
+          2: { cellWidth: 'auto' },
           3: { cellWidth: 'auto' },
+          4: { cellWidth: 'auto' },
+          5: { cellWidth: 'auto' },
         },
         didParseCell: (data) => {
-          // Color severity cells
           if (data.section === 'body' && data.column.index === 2) {
             const severity = data.cell.raw as string;
             if (severity === 'grave') {
@@ -366,8 +428,8 @@ export default function RelatorioAlunoPage() {
       doc.setFontSize(8);
       doc.setTextColor(150);
       doc.text(
-        `Página ${i} de ${pageCount} - Focus Sistema de Gestão Escolar`,
-        doc.internal.pageSize.width / 2,
+        `Página ${i} de ${pageCount} - Focus Sistema de Gestão Escolar - Gerado em ${formatDate(new Date())}`,
+        pageCenter,
         doc.internal.pageSize.height - 10,
         { align: 'center' }
       );

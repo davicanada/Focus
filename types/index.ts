@@ -18,7 +18,6 @@ export type FeedbackActionType =
   | 'suspension'
   | 'mediation'
   | 'observation'
-  | 'resolved'
   | 'other';
 
 export type AccessRequestStatus = 'pending' | 'approved' | 'rejected';
@@ -112,6 +111,18 @@ export interface Student {
   class?: Class;
 }
 
+export interface OccurrenceSubcategory {
+  id: string;
+  institution_id: string | null; // null = padrao do sistema
+  name: string;
+  description?: string;
+  color?: string;
+  is_default: boolean;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface OccurrenceType {
   id: string;
   institution_id: string;
@@ -119,6 +130,8 @@ export interface OccurrenceType {
   severity: 'leve' | 'media' | 'grave';
   description?: string;
   education_levels?: string[]; // Niveis de ensino (null = geral/todos)
+  subcategory_id?: string;
+  subcategory?: OccurrenceSubcategory; // JOIN opcional
   is_active: boolean;
   deleted_at?: string; // Soft delete
   created_at: string;

@@ -13,7 +13,14 @@ import { Spinner } from '@/components/ui/spinner';
 import { ProgressLink } from '@/components/ProgressLink';
 import { createClient } from '@/lib/supabase/client';
 import { getFromStorage, removeFromStorage, formatDate, formatClassFullName, getEducationLevelOrder } from '@/lib/utils';
-import type { User, Institution, Quarter } from '@/types';
+import { FEEDBACK_ACTION_TYPES, LEGACY_ACTION_TYPES } from '@/lib/constants/feedback';
+import type { User, Institution, Quarter, FeedbackActionType } from '@/types';
+
+interface OccurrenceFeedbackData {
+  action_type: string;
+  description: string | null;
+  performed_at: string;
+}
 
 interface OccurrenceData {
   id: string;
@@ -32,10 +39,12 @@ interface OccurrenceData {
   occurrence_type: {
     category: string;
     severity: string;
+    subcategory?: { name: string } | null;
   } | null;
   registered_by_user: {
     full_name: string;
   } | null;
+  feedbacks?: OccurrenceFeedbackData[] | null;
 }
 
 interface GroupedData {
@@ -46,7 +55,9 @@ interface GroupedData {
       date: string;
       type: string;
       severity: string;
+      subcategory: string;
       description: string;
+      devolutiva: string;
       registeredBy: string;
     }[];
   }[];
@@ -119,6 +130,15 @@ export default function RelatorioPeriodoPage() {
     return `${formatShort(start)} - ${formatShort(end)}`;
   };
 
+  const formatFeedbackText = (feedbacks?: OccurrenceFeedbackData[] | null): string => {
+    if (!feedbacks || feedbacks.length === 0) return 'Pendente';
+    const sorted = [...feedbacks].sort((a, b) => new Date(b.performed_at).getTime() - new Date(a.performed_at).getTime());
+    return sorted.map(fb => {
+      const label = FEEDBACK_ACTION_TYPES[fb.action_type as FeedbackActionType]?.label || LEGACY_ACTION_TYPES[fb.action_type]?.label || fb.action_type;
+      return fb.description ? `${label}: ${fb.description}` : label;
+    }).join('\n');
+  };
+
   const groupOccurrencesByClassAndStudent = (occurrences: OccurrenceData[]): GroupedData[] => {
     const grouped: Record<string, { educationLevel: string; students: Record<string, OccurrenceData[]> }> = {};
 
@@ -156,7 +176,9 @@ export default function RelatorioPeriodoPage() {
                 date: formatDate(occ.occurrence_date),
                 type: occ.occurrence_type?.category || '',
                 severity: occ.occurrence_type?.severity || '',
+                subcategory: occ.occurrence_type?.subcategory?.name || '-',
                 description: occ.description || '',
+                devolutiva: formatFeedbackText(occ.feedbacks),
                 registeredBy: occ.registered_by_user?.full_name || '',
               })),
           })),
@@ -184,10 +206,12 @@ export default function RelatorioPeriodoPage() {
           occurrence_date,
           description,
           student:students(id, full_name, class:classes(id, name, education_level, shift)),
-          occurrence_type:occurrence_types(category, severity),
-          registered_by_user:users!occurrences_registered_by_fkey(full_name)
+          occurrence_type:occurrence_types(category, severity, subcategory:occurrence_subcategories(name)),
+          registered_by_user:users!occurrences_registered_by_fkey(full_name),
+          feedbacks:occurrence_feedbacks(action_type, description, performed_at)
         `)
         .eq('institution_id', currentInstitution?.id)
+        .is('deleted_at', null)
         .gte('occurrence_date', selectedQuarter.start_date)
         .lte('occurrence_date', selectedQuarter.end_date + 'T23:59:59')
         .order('occurrence_date', { ascending: true });
@@ -228,14 +252,14 @@ export default function RelatorioPeriodoPage() {
     const worksheet = workbook.addWorksheet('Relatório por Período');
 
     // Title
-    worksheet.mergeCells('A1:F1');
+    worksheet.mergeCells('A1:H1');
     const titleCell = worksheet.getCell('A1');
     titleCell.value = `Relatório de Ocorrências - ${currentInstitution?.name}`;
     titleCell.font = { bold: true, size: 16 };
     titleCell.alignment = { horizontal: 'center' };
 
     // Period
-    worksheet.mergeCells('A2:F2');
+    worksheet.mergeCells('A2:H2');
     const periodCell = worksheet.getCell('A2');
     periodCell.value = `${selectedQuarter.name} (${formatDate(selectedQuarter.start_date)} a ${formatDate(selectedQuarter.end_date)})`;
     periodCell.alignment = { horizontal: 'center' };
@@ -244,7 +268,7 @@ export default function RelatorioPeriodoPage() {
 
     data.forEach((classData) => {
       // Class header
-      worksheet.mergeCells(`A${currentRow}:F${currentRow}`);
+      worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
       const classCell = worksheet.getCell(`A${currentRow}`);
       classCell.value = `Turma: ${classData.className}`;
       classCell.font = { bold: true, size: 14 };
@@ -258,7 +282,7 @@ export default function RelatorioPeriodoPage() {
 
       classData.students.forEach((student) => {
         // Student header
-        worksheet.mergeCells(`A${currentRow}:F${currentRow}`);
+        worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
         const studentCell = worksheet.getCell(`A${currentRow}`);
         studentCell.value = `  ${student.studentName} (${student.occurrences.length} ocorrência${student.occurrences.length > 1 ? 's' : ''})`;
         studentCell.font = { bold: true };
@@ -271,14 +295,15 @@ export default function RelatorioPeriodoPage() {
 
         // Occurrences header
         const headerRow = worksheet.getRow(currentRow);
-        headerRow.values = ['', 'Data', 'Tipo', 'Severidade', 'Descrição', 'Registrado por'];
+        headerRow.values = ['', 'Data', 'Tipo', 'Severidade', 'Subcategoria', 'Descrição', 'Devolutiva', 'Registrado por'];
         headerRow.font = { bold: true };
         currentRow++;
 
         // Occurrences data
         student.occurrences.forEach((occ) => {
           const dataRow = worksheet.getRow(currentRow);
-          dataRow.values = ['', occ.date, occ.type, occ.severity, occ.description, occ.registeredBy];
+          dataRow.values = ['', occ.date, occ.type, occ.severity, occ.subcategory, occ.description, occ.devolutiva, occ.registeredBy];
+          dataRow.getCell(7).alignment = { wrapText: true };
           currentRow++;
         });
 
@@ -294,7 +319,9 @@ export default function RelatorioPeriodoPage() {
       { width: 12 },
       { width: 20 },
       { width: 12 },
-      { width: 50 },
+      { width: 18 },
+      { width: 40 },
+      { width: 40 },
       { width: 25 },
     ];
 
@@ -315,7 +342,9 @@ export default function RelatorioPeriodoPage() {
     const { jsPDF } = await import('jspdf');
     const { default: autoTable } = await import('jspdf-autotable');
 
-    const doc = new jsPDF();
+    const doc = new jsPDF({ orientation: 'landscape' });
+    const pageWidth = doc.internal.pageSize.width;
+    const pageCenter = pageWidth / 2;
     let yPosition = 20;
 
     // Title
@@ -334,7 +363,7 @@ export default function RelatorioPeriodoPage() {
 
     data.forEach((classData) => {
       // Check if we need a new page
-      if (yPosition > 250) {
+      if (yPosition > 170) {
         doc.addPage();
         yPosition = 20;
       }
@@ -347,7 +376,7 @@ export default function RelatorioPeriodoPage() {
 
       classData.students.forEach((student) => {
         // Check if we need a new page
-        if (yPosition > 250) {
+        if (yPosition > 170) {
           doc.addPage();
           yPosition = 20;
         }
@@ -359,34 +388,39 @@ export default function RelatorioPeriodoPage() {
         doc.text(`${student.studentName} (${student.occurrences.length} ocorrência${student.occurrences.length > 1 ? 's' : ''})`, 20, yPosition);
         yPosition += 2;
 
-        // Occurrences table
+        // Occurrences table (6 columns)
         autoTable(doc, {
           startY: yPosition,
-          head: [['Data', 'Tipo', 'Severidade', 'Descrição']],
+          head: [['Data', 'Tipo', 'Severidade', 'Subcategoria', 'Descrição', 'Devolutiva']],
           body: student.occurrences.map((occ) => [
             occ.date,
             occ.type,
             occ.severity,
+            occ.subcategory,
             occ.description || '-',
+            occ.devolutiva,
           ]),
           headStyles: {
             fillColor: [100, 116, 139],
             textColor: 255,
             fontStyle: 'bold',
-            fontSize: 9,
+            fontSize: 8,
           },
           styles: {
-            fontSize: 8,
+            fontSize: 7,
             cellPadding: 2,
+            overflow: 'linebreak',
           },
           columnStyles: {
-            0: { cellWidth: 22 },
-            1: { cellWidth: 30 },
-            2: { cellWidth: 22 },
+            0: { cellWidth: 20 },
+            1: { cellWidth: 'auto' },
+            2: { cellWidth: 'auto' },
             3: { cellWidth: 'auto' },
+            4: { cellWidth: 'auto' },
+            5: { cellWidth: 'auto' },
           },
-          margin: { left: 20 },
-          tableWidth: 170,
+          margin: { left: 20, right: 14 },
+          tableWidth: pageWidth - 34,
         });
 
         yPosition = (doc as any).lastAutoTable.finalY + 8;
@@ -403,7 +437,7 @@ export default function RelatorioPeriodoPage() {
       doc.setTextColor(150);
       doc.text(
         `Página ${i} de ${pageCount} - Focus Sistema de Gestão Escolar - Gerado em ${formatDate(new Date())}`,
-        doc.internal.pageSize.width / 2,
+        pageCenter,
         doc.internal.pageSize.height - 10,
         { align: 'center' }
       );

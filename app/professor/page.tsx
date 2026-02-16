@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
 import { createClient } from '@/lib/supabase/client';
 import { getFromStorage, removeFromStorage, formatDateTime } from '@/lib/utils';
-import { OCCURRENCE_STATUS, FEEDBACK_ACTION_TYPES } from '@/lib/constants/feedback';
+import { OCCURRENCE_STATUS, FEEDBACK_ACTION_TYPES, LEGACY_ACTION_TYPES } from '@/lib/constants/feedback';
 import type { User, Institution, UserInstitution, OccurrenceStatus, FeedbackActionType } from '@/types';
 import Link from 'next/link';
 
@@ -305,7 +305,7 @@ export default function ProfessorDashboardPage() {
                 <div className="space-y-3">
                   {feedbackSummary.recent_updates.map((update) => {
                     const statusInfo = OCCURRENCE_STATUS[update.status];
-                    const feedbackInfo = update.last_feedback_type ? FEEDBACK_ACTION_TYPES[update.last_feedback_type] : null;
+                    const feedbackInfo = update.last_feedback_type ? (FEEDBACK_ACTION_TYPES[update.last_feedback_type] || LEGACY_ACTION_TYPES[update.last_feedback_type]) : null;
 
                     return (
                       <div
