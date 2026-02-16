@@ -10,6 +10,7 @@ import {
   RefreshCcw,
   ArchiveRestore,
   Archive,
+  FileUp,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,6 +33,7 @@ import {
   type EducationStage,
 } from '@/lib/constants/education';
 import { type User, type Institution, type Class } from '@/types';
+import { PdfImportModal } from '@/components/import/PdfImportModal';
 
 export default function TurmasPage() {
   const router = useRouter();
@@ -48,6 +50,7 @@ export default function TurmasPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -342,10 +345,16 @@ export default function TurmasPage() {
               Gerencie as turmas da instituição
             </p>
           </div>
-          <Button onClick={() => handleOpenModal()}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Turma
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowImportModal(true)}>
+              <FileUp className="h-4 w-4 mr-2" />
+              Importar PDF
+            </Button>
+            <Button onClick={() => handleOpenModal()}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Turma
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="active">
@@ -610,6 +619,15 @@ export default function TurmasPage() {
           </ModalFooter>
         </div>
       </Modal>
+      {/* PDF Import Modal */}
+      <PdfImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        institutionId={currentInstitution?.id || ''}
+        year={new Date().getFullYear()}
+        existingClassNames={classes.map((c) => c.name)}
+        onImportComplete={() => loadClasses(currentInstitution!.id)}
+      />
     </DashboardLayout>
   );
 }

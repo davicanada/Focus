@@ -13,6 +13,12 @@ const nextConfig = {
 
   // Compressao
   compress: true,
+
+  // Webpack: exclude pdfjs-dist worker from bundling (loaded from CDN)
+  webpack: (config) => {
+    config.resolve.alias.canvas = false;
+    return config;
+  },
 };
 
 export default nextConfig;
