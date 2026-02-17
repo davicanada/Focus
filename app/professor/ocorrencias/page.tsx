@@ -22,7 +22,7 @@ import { OccurrenceStatusBadge, OccurrenceDetailModal } from '@/components/occur
 
 interface OccurrenceWithRelations extends Omit<Occurrence, 'student' | 'occurrence_type' | 'class_at_occurrence'> {
   student?: { full_name: string; class?: { name: string; education_level?: string } };
-  occurrence_type?: { category: string; severity: string };
+  occurrence_type?: { category: string; severity: string; subcategory?: { name: string; color?: string } };
   class_at_occurrence?: { name: string };
 }
 
@@ -132,7 +132,7 @@ export default function MinhasOcorrenciasPage() {
         .select(`
           *,
           student:students(full_name, class:classes(name, education_level)),
-          occurrence_type:occurrence_types(category, severity),
+          occurrence_type:occurrence_types(category, severity, subcategory:occurrence_subcategories(name, color)),
           class_at_occurrence:classes!occurrences_class_id_at_occurrence_fkey(name)
         `)
         .eq('institution_id', institutionId)
@@ -368,6 +368,7 @@ export default function MinhasOcorrenciasPage() {
                     <TableHead>Aluno</TableHead>
                     <TableHead>Turma</TableHead>
                     <TableHead>Tipo</TableHead>
+                    <TableHead>Subcategoria</TableHead>
                     <TableHead>Severidade</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Ações</TableHead>
@@ -384,6 +385,18 @@ export default function MinhasOcorrenciasPage() {
                       </TableCell>
                       <TableCell>{occurrence.student?.class?.name}</TableCell>
                       <TableCell>{occurrence.occurrence_type?.category}</TableCell>
+                      <TableCell>
+                        {occurrence.occurrence_type?.subcategory ? (
+                          <span
+                            className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium text-white"
+                            style={{ backgroundColor: occurrence.occurrence_type.subcategory.color || '#6B7280' }}
+                          >
+                            {occurrence.occurrence_type.subcategory.name}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
+                        )}
+                      </TableCell>
                       <TableCell>
                         {getSeverityBadge(occurrence.occurrence_type?.severity || 'leve')}
                       </TableCell>

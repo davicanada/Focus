@@ -21,6 +21,10 @@ interface OccurrenceData {
   occurrence_type?: {
     category: string;
     severity: string;
+    subcategory?: {
+      name: string;
+      color?: string;
+    };
   };
 }
 
@@ -79,7 +83,20 @@ export function OccurrenceDetailModal({ isOpen, onClose, occurrence }: Occurrenc
                 {getSeverityBadge(occurrence.occurrence_type?.severity || 'leve')}
               </div>
             </div>
-            <div className="col-span-2">
+            {occurrence.occurrence_type?.subcategory && (
+              <div>
+                <p className="text-muted-foreground">Subcategoria</p>
+                <div className="mt-1">
+                  <span
+                    className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium text-white"
+                    style={{ backgroundColor: occurrence.occurrence_type.subcategory.color || '#6B7280' }}
+                  >
+                    {occurrence.occurrence_type.subcategory.name}
+                  </span>
+                </div>
+              </div>
+            )}
+            <div className={occurrence.occurrence_type?.subcategory ? '' : 'col-span-2'}>
               <p className="text-muted-foreground">Data da Ocorrência</p>
               <p className="font-medium">{formatDateTime(occurrence.occurrence_date)}</p>
             </div>

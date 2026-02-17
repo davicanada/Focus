@@ -1,0 +1,38 @@
+project:
+  name: "occurrence-feedback-devolutiva"
+  scale: LARGE
+  started: "2026-02-04T03:28:29.856Z"
+  current_phase: E
+
+phases:
+  P:
+    status: filled
+    started_at: "2026-02-04T03:28:29.856Z"
+    completed_at: "2026-02-04T03:28:56.706Z"
+  R:
+    status: filled
+    started_at: "2026-02-04T03:28:56.709Z"
+    completed_at: "2026-02-04T03:29:07.996Z"
+  E:
+    status: in_progress
+    started_at: "2026-02-04T03:29:08.002Z"
+  V:
+    status: pending
+  C:
+    status: pending
+
+execution:
+  history:
+    - timestamp: "2026-02-04T03:29:08.002Z"
+      phase: E
+      action: started
+  last_activity: "2026-02-04T03:29:08.002Z"
+  resume_context: "Fase E (Execução) em progresso"
+
+approval:
+  plan_created: true
+  plan_approved: true
+  approved_by: "developer"
+  approved_at: "2026-02-04T03:29:04.609Z"
+  approval_notes: "Plano aprovado pelo usuário para implementação"
+

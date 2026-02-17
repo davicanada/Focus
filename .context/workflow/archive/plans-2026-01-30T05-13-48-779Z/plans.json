@@ -1,0 +1,13 @@
+{
+  "active": [
+    {
+      "slug": "professor-shift-filter",
+      "path": "plans/professor-shift-filter.md",
+      "title": "Filtro de Turno para Professor ao Registrar Ocorrencias",
+      "linkedAt": "2026-01-30T04:53:47.041Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "professor-shift-filter"
+}

@@ -1,0 +1,37 @@
+project:
+  name: "add-user-role-selection"
+  scale: SMALL
+  started: "2026-02-02T04:02:38.270Z"
+  current_phase: V
+
+phases:
+  P:
+    status: filled
+    started_at: "2026-02-02T04:02:38.270Z"
+    completed_at: "2026-02-02T04:02:46.023Z"
+  R:
+    status: skipped
+    reason: "Not required for scale SMALL"
+  E:
+    status: filled
+    started_at: "2026-02-02T04:02:46.025Z"
+    completed_at: "2026-02-02T04:05:33.855Z"
+  V:
+    status: in_progress
+    started_at: "2026-02-02T04:05:33.858Z"
+  C:
+    status: skipped
+    reason: "Not required for scale SMALL"
+
+execution:
+  history:
+    - timestamp: "2026-02-02T04:05:33.858Z"
+      phase: V
+      action: started
+  last_activity: "2026-02-02T04:05:33.858Z"
+  resume_context: "Fase V (Validação) em progresso"
+
+approval:
+  plan_created: true
+  plan_approved: false
+

@@ -71,7 +71,7 @@ export default function RegistrarOcorrenciaPage() {
 
       const [classesRes, typesRes] = await Promise.all([
         classesQuery.order('name'),
-        supabase.from('occurrence_types').select('*').eq('institution_id', institutionId).eq('is_active', true).order('category'),
+        supabase.from('occurrence_types').select('*, subcategory:occurrence_subcategories(name, color)').eq('institution_id', institutionId).eq('is_active', true).order('category'),
       ]);
 
       setClasses(classesRes.data || []);
@@ -343,7 +343,7 @@ export default function RegistrarOcorrenciaPage() {
                     })
                     .map((type) => (
                     <option key={type.id} value={type.id}>
-                      {type.category} ({type.severity})
+                      {type.category} ({type.severity}){type.subcategory ? ` - ${type.subcategory.name}` : ''}
                     </option>
                   ))}
                 </Select>

@@ -1,0 +1,37 @@
+project:
+  name: "ai-judgmental-filter"
+  scale: SMALL
+  started: "2026-01-30T05:43:03.047Z"
+  current_phase: V
+
+phases:
+  P:
+    status: filled
+    started_at: "2026-01-30T05:43:03.047Z"
+    completed_at: "2026-01-30T05:43:11.189Z"
+  R:
+    status: skipped
+    reason: "Not required for scale SMALL"
+  E:
+    status: filled
+    started_at: "2026-01-30T05:43:11.192Z"
+    completed_at: "2026-01-30T05:45:44.922Z"
+  V:
+    status: in_progress
+    started_at: "2026-01-30T05:45:44.924Z"
+  C:
+    status: skipped
+    reason: "Not required for scale SMALL"
+
+execution:
+  history:
+    - timestamp: "2026-01-30T05:45:44.924Z"
+      phase: V
+      action: started
+  last_activity: "2026-01-30T05:45:44.924Z"
+  resume_context: "Fase V (Validação) em progresso"
+
+approval:
+  plan_created: true
+  plan_approved: false
+

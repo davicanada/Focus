@@ -1,0 +1,13 @@
+{
+  "active": [
+    {
+      "slug": "fix-student-report-layout-columns",
+      "path": "plans/fix-student-report-layout-columns.md",
+      "title": "Corrigir layout PDF do aluno + adicionar colunas subcategoria e devolutiva",
+      "linkedAt": "2026-02-16T05:21:06.272Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "fix-student-report-layout-columns"
+}

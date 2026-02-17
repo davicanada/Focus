@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "replace-fictitious-data-maringa",
+      "path": "plans/replace-fictitious-data-maringa.md",
+      "title": "Substituir dados ficticios da EEEFM MARINGA por dados reais",
+      "summary": "Remover alunos, turmas e ocorrencias ficticias e carregar 18 turmas e 449 alunos reais do relatorio SEDU-ES.",
+      "linkedAt": "2026-02-16T06:29:08.268Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "replace-fictitious-data-maringa"
+}

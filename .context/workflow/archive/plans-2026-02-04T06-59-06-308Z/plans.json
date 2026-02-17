@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "occurrence-feedback-devolutiva",
+      "path": "plans/occurrence-feedback-devolutiva.md",
+      "title": "Sistema de Devolutivas - Feedback de Ocorrências",
+      "summary": "Permitir que admin/viewer registrem ações tomadas (devolutivas) nas ocorrências e que professores acompanhem o status e as providências.",
+      "linkedAt": "2026-02-04T03:28:34.939Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "occurrence-feedback-devolutiva"
+}

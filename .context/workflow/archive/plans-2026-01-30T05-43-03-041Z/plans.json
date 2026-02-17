@@ -1,0 +1,13 @@
+{
+  "active": [
+    {
+      "slug": "professor-delete-occurrence-48h",
+      "path": "plans/professor-delete-occurrence-48h.md",
+      "title": "Professor pode excluir proprias ocorrencias em ate 48 horas",
+      "linkedAt": "2026-01-30T05:13:53.149Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "professor-delete-occurrence-48h"
+}

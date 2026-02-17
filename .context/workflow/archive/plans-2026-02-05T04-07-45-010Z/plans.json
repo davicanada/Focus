@@ -1,0 +1,13 @@
+{
+  "active": [
+    {
+      "slug": "add-professor-to-devolutiva-report",
+      "path": "plans/add-professor-to-devolutiva-report.md",
+      "title": "Adicionar Professor da Ocorrência ao Relatório de Devolutivas",
+      "linkedAt": "2026-02-04T06:59:10.193Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "add-professor-to-devolutiva-report"
+}

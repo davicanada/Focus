@@ -1,51 +1,37 @@
 project:
-  name: "analytics-dashboard-improvements-v2"
-  scale: MEDIUM
-  started: "2026-01-25T06:47:40.402Z"
-  current_phase: V
+  name: "pdf-import-students"
+  scale: LARGE
+  started: "2026-02-16T06:50:01.547Z"
+  current_phase: R
 
 phases:
   P:
     status: filled
-    started_at: "2026-01-25T06:47:40.402Z"
-    completed_at: "2026-01-25T07:40:55.926Z"
+    started_at: "2026-02-16T06:50:01.547Z"
+    completed_at: "2026-02-16T06:50:13.054Z"
   R:
-    status: filled
-    started_at: "2026-01-25T07:40:55.930Z"
-    completed_at: "2026-01-25T10:39:57.471Z"
+    status: in_progress
+    started_at: "2026-02-16T06:50:13.060Z"
   E:
-    status: filled
-    started_at: "2026-01-25T10:39:57.474Z"
-    completed_at: "2026-01-25T10:40:02.096Z"
+    status: pending
   V:
-    status: completed
-    started_at: "2026-01-25T10:40:02.099Z"
-    completed_at: "2026-01-25T10:51:28.188Z"
-    outputs:
-      - path: "app/admin/dashboard/page.tsx"
-        status: filled
-      - path: "components/layout/DashboardLayout.tsx"
-        status: filled
-      - path: "components/layout/Sidebar.tsx"
-        status: filled
-      - path: "app/api/institutions/admin/route.ts"
-        status: filled
+    status: pending
   C:
-    status: skipped
-    reason: "Not required for scale MEDIUM"
+    status: pending
 
 execution:
   history:
-    - timestamp: "2026-01-25T10:51:28.188Z"
-      phase: V
-      action: completed
-  last_activity: "2026-01-25T10:51:28.188Z"
-  resume_context: "Fase V (Validação) concluída"
+    - timestamp: "2026-02-16T06:50:18.057Z"
+      phase: R
+      action: plan_approved
+      approved_by: "solo-dev"
+  last_activity: "2026-02-16T06:50:18.057Z"
+  resume_context: "Plano aprovado - pronto para execução"
 
 approval:
   plan_created: true
   plan_approved: true
-  approved_by: "developer"
-  approved_at: "2026-01-25T10:39:53.429Z"
-  approval_notes: "Plano implementado com sucesso na sessão anterior. Build passando, filtro de ano funcionando, sidebar responsiva."
+  approved_by: "solo-dev"
+  approved_at: "2026-02-16T06:50:18.057Z"
+  approval_notes: "Plan approved by user. Client-side PDF parsing with pdfjs-dist, SEDU-ES regex parser, AI fallback, preview modal on turmas page."
 

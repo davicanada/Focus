@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { AIChat } from '@/components/analytics/AIChat';
 import { createClient } from '@/lib/supabase/client';
-import { getFromStorage, removeFromStorage, ANALYTICS_COLORS, cn, getEducationLevelOrder } from '@/lib/utils';
+import { getFromStorage, removeFromStorage, ANALYTICS_COLORS, CHART_COLORS, cn, getEducationLevelOrder } from '@/lib/utils';
 import { AlertTriangle, BarChart2, AlertCircle, Users } from 'lucide-react';
 import type { User, Institution } from '@/types';
 
@@ -24,6 +24,7 @@ export interface AnalyticsDashboardProps {
 interface FilterState {
   categories: string[];
   severities: string[];
+  subcategories: string[];
   months: string[];
   classIds: string[];
   studentIds: string[];
@@ -145,6 +146,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
   const [activeFilters, setActiveFilters] = useState<FilterState>({
     categories: [],
     severities: [],
+    subcategories: [],
     months: [],
     classIds: [],
     studentIds: [],
@@ -165,6 +167,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
   // Chart data
   const [categoryData, setCategoryData] = useState<{ name: string; value: number; severity: string }[]>([]);
   const [severityData, setSeverityData] = useState<{ name: string; value: number }[]>([]);
+  const [subcategoryData, setSubcategoryData] = useState<{ name: string; value: number; severity: string }[]>([]);
   const [monthlyData, setMonthlyData] = useState<{ month: string; count: number }[]>([]);
   const [topStudents, setTopStudents] = useState<{ name: string; count: number; id?: string }[]>([]);
   const [classData, setClassData] = useState<{ name: string; count: number; educationLevel: string }[]>([]);
@@ -179,6 +182,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
   // Chart refs for event handling
   const categoryChartRef = useRef<any>(null);
   const severityChartRef = useRef<any>(null);
+  const subcategoryChartRef = useRef<any>(null);
   const monthlyChartRef = useRef<any>(null);
   const topStudentsChartRef = useRef<any>(null);
   const classChartRef = useRef<any>(null);
@@ -293,7 +297,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
             id,
             occurrence_date,
             student_id,
-            occurrence_type:occurrence_types(category, severity),
+            occurrence_type:occurrence_types(category, severity, subcategory:occurrence_subcategories(name, color)),
             student:students(
               id,
               full_name,
@@ -329,6 +333,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
       const categoryCount: Record<string, { count: number; severity: string }> = {};
       allOccurrences?.forEach((r: any) => {
         if (!matchesFilter(r.occurrence_type?.severity, filters.severities)) return;
+        if (!matchesFilter(r.occurrence_type?.subcategory?.name || 'Não classificado', filters.subcategories)) return;
         if (!matchesFilter(r.student?.class?.name, filters.classIds)) return;
         if (!matchesFilter(r.student?.full_name, filters.studentIds)) return;
         if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return;
@@ -354,6 +359,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
       const severityCount: Record<string, number> = {};
       allOccurrences?.forEach((r: any) => {
         if (!matchesFilter(r.occurrence_type?.category, filters.categories)) return;
+        if (!matchesFilter(r.occurrence_type?.subcategory?.name || 'Não classificado', filters.subcategories)) return;
         if (!matchesFilter(r.student?.class?.name, filters.classIds)) return;
         if (!matchesFilter(r.student?.full_name, filters.studentIds)) return;
         if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return;
@@ -370,6 +376,37 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         }))
       );
 
+      // Subcategory distribution - exclude subcategory filter for this chart
+      // Track severity counts per subcategory to determine predominant severity
+      const subcategoryCount: Record<string, { count: number; severityCounts: Record<string, number> }> = {};
+      allOccurrences?.forEach((r: any) => {
+        if (!matchesFilter(r.occurrence_type?.category, filters.categories)) return;
+        if (!matchesFilter(r.occurrence_type?.severity, filters.severities)) return;
+        if (!matchesFilter(r.student?.class?.name, filters.classIds)) return;
+        if (!matchesFilter(r.student?.full_name, filters.studentIds)) return;
+        if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return;
+        if (!matchesFilter(r.student?.class?.shift || 'nao_informado', filters.shifts)) return;
+        if (!matchesFilter(getMonthName(r.occurrence_date), filters.months)) return;
+
+        const subName = r.occurrence_type?.subcategory?.name || 'Não classificado';
+        const sev = r.occurrence_type?.severity || 'leve';
+        if (!subcategoryCount[subName]) {
+          subcategoryCount[subName] = { count: 0, severityCounts: {} };
+        }
+        subcategoryCount[subName].count += 1;
+        subcategoryCount[subName].severityCounts[sev] = (subcategoryCount[subName].severityCounts[sev] || 0) + 1;
+      });
+
+      setSubcategoryData(
+        Object.entries(subcategoryCount)
+          .map(([name, { count, severityCounts }]) => {
+            // Predominant severity = the one with most occurrences in this subcategory
+            const predominant = Object.entries(severityCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'leve';
+            return { name, value: count, severity: predominant };
+          })
+          .sort((a, b) => b.value - a.value)
+      );
+
       // Monthly trend (Jan-Dec of selected year) - exclude month filter for this chart
       const months: { month: string; count: number }[] = [];
 
@@ -380,6 +417,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
           if (occDate.getMonth() !== monthIndex) return false;
           if (!matchesFilter(r.occurrence_type?.category, filters.categories)) return false;
           if (!matchesFilter(r.occurrence_type?.severity, filters.severities)) return false;
+          if (!matchesFilter(r.occurrence_type?.subcategory?.name || 'Não classificado', filters.subcategories)) return false;
           if (!matchesFilter(r.student?.class?.name, filters.classIds)) return false;
           if (!matchesFilter(r.student?.full_name, filters.studentIds)) return false;
           if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return false;
@@ -399,6 +437,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
       allOccurrences?.forEach((r: any) => {
         if (!matchesFilter(r.occurrence_type?.category, filters.categories)) return;
         if (!matchesFilter(r.occurrence_type?.severity, filters.severities)) return;
+        if (!matchesFilter(r.occurrence_type?.subcategory?.name || 'Não classificado', filters.subcategories)) return;
         if (!matchesFilter(r.student?.class?.name, filters.classIds)) return;
         if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return;
         if (!matchesFilter(r.student?.class?.shift || 'nao_informado', filters.shifts)) return;
@@ -437,6 +476,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
       allOccurrences?.forEach((r: any) => {
         if (!matchesFilter(r.occurrence_type?.category, filters.categories)) return;
         if (!matchesFilter(r.occurrence_type?.severity, filters.severities)) return;
+        if (!matchesFilter(r.occurrence_type?.subcategory?.name || 'Não classificado', filters.subcategories)) return;
         if (!matchesFilter(r.student?.full_name, filters.studentIds)) return;
         if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return;
         if (!matchesFilter(r.student?.class?.shift || 'nao_informado', filters.shifts)) return;
@@ -465,6 +505,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
       allOccurrences?.forEach((r: any) => {
         if (!matchesFilter(r.occurrence_type?.category, filters.categories)) return;
         if (!matchesFilter(r.occurrence_type?.severity, filters.severities)) return;
+        if (!matchesFilter(r.occurrence_type?.subcategory?.name || 'Não classificado', filters.subcategories)) return;
         if (!matchesFilter(r.student?.class?.name, filters.classIds)) return;
         if (!matchesFilter(r.student?.full_name, filters.studentIds)) return;
         if (!matchesFilter(r.student?.class?.shift || 'nao_informado', filters.shifts)) return;
@@ -486,6 +527,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
       allOccurrences?.forEach((r: any) => {
         if (!matchesFilter(r.occurrence_type?.category, filters.categories)) return;
         if (!matchesFilter(r.occurrence_type?.severity, filters.severities)) return;
+        if (!matchesFilter(r.occurrence_type?.subcategory?.name || 'Não classificado', filters.subcategories)) return;
         if (!matchesFilter(r.student?.class?.name, filters.classIds)) return;
         if (!matchesFilter(r.student?.full_name, filters.studentIds)) return;
         if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return;
@@ -507,6 +549,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
       const kpiFilteredData = (allOccurrences || []).filter((r: any) => {
         if (!matchesFilter(r.occurrence_type?.category, filters.categories)) return false;
         if (!matchesFilter(r.occurrence_type?.severity, filters.severities)) return false;
+        if (!matchesFilter(r.occurrence_type?.subcategory?.name || 'Não classificado', filters.subcategories)) return false;
         if (!matchesFilter(r.student?.class?.name, filters.classIds)) return false;
         if (!matchesFilter(r.student?.full_name, filters.studentIds)) return false;
         if (!matchesFilter(r.student?.class?.education_level, filters.educationLevels)) return false;
@@ -569,7 +612,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
         };
       } else {
         const isSelectedAlone = currentArray.length === 1 && currentArray[0] === value;
-        const empty: FilterState = { categories: [], severities: [], months: [], classIds: [], studentIds: [], educationLevels: [], shifts: [] };
+        const empty: FilterState = { categories: [], severities: [], subcategories: [], months: [], classIds: [], studentIds: [], educationLevels: [], shifts: [] };
         return {
           ...empty,
           [filterType]: isSelectedAlone ? [] : [value],
@@ -582,6 +625,7 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
     setActiveFilters({
       categories: [],
       severities: [],
+      subcategories: [],
       months: [],
       classIds: [],
       studentIds: [],
@@ -640,6 +684,13 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
       const shiftKey = shiftKeysFromLabels[params.name] || params.name;
       const isCtrl = params.event?.event?.ctrlKey || params.event?.event?.metaKey || false;
       handleFilterClick('shifts', shiftKey, isCtrl);
+    }
+  }, [handleFilterClick]);
+
+  const handleSubcategoryClick = useCallback((params: any) => {
+    if (params.name) {
+      const isCtrl = params.event?.event?.ctrlKey || params.event?.event?.metaKey || false;
+      handleFilterClick('subcategories', params.name, isCtrl);
     }
   }, [handleFilterClick]);
 
@@ -726,6 +777,43 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
           shadowColor: 'rgba(0, 0, 0, 0.5)',
         },
       },
+    }],
+  };
+
+  const sortedSubcategoryData = [...subcategoryData].sort((a, b) => a.value - b.value);
+  const subcategoryChartOption = {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: '3%', right: '12%', bottom: '3%', top: '3%', containLabel: true },
+    xAxis: { type: 'value', show: false },
+    yAxis: {
+      type: 'category',
+      data: sortedSubcategoryData.map(d => d.name),
+      axisLabel: { width: 120, overflow: 'truncate', fontSize: 12 },
+    },
+    series: [{
+      type: 'bar',
+      data: sortedSubcategoryData.map((item) => {
+        const isSelected = activeFilters.subcategories.includes(item.name);
+        const hasActiveFilter = activeFilters.subcategories.length > 0;
+        const baseColor = severityColors[item.severity] || severityColors.leve;
+        return {
+          value: item.value,
+          itemStyle: {
+            color: isSelected
+              ? baseColor
+              : hasActiveFilter
+                ? `${baseColor}4D`
+                : baseColor,
+          },
+        };
+      }),
+      label: {
+        show: true,
+        position: 'right',
+        formatter: '{c}',
+        fontSize: 12,
+      },
+      barMaxWidth: 15,
     }],
   };
 
@@ -947,6 +1035,11 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
     chart.on('click', handleSeverityClick);
   };
 
+  const onSubcategoryChartReady = (chart: any) => {
+    subcategoryChartRef.current = chart;
+    chart.on('click', handleSubcategoryClick);
+  };
+
   const onMonthlyChartReady = (chart: any) => {
     monthlyChartRef.current = chart;
     chart.on('click', handleMonthlyClick);
@@ -1111,11 +1204,11 @@ export function AnalyticsDashboard({ role }: AnalyticsDashboardProps) {
                 )}
               </div>
               <div>
-                {severityData.length > 0 ? (
+                {subcategoryData.length > 0 ? (
                   <ReactECharts
-                    option={severityChartOption}
-                    style={{ height: Math.max(180, categoryData.length * 24) }}
-                    onChartReady={onSeverityChartReady}
+                    option={subcategoryChartOption}
+                    style={{ height: Math.max(180, subcategoryData.length * 24) }}
+                    onChartReady={onSubcategoryChartReady}
                   />
                 ) : (
                   <p className="text-center text-muted-foreground py-8 text-xs">Sem dados</p>

@@ -1,0 +1,13 @@
+{
+  "active": [
+    {
+      "slug": "fix-cross-filter-months",
+      "path": "plans/fix-cross-filter-months.md",
+      "title": "Corrigir Cross-Filtering entre Graficos de Tipos Diferentes",
+      "linkedAt": "2026-02-02T03:13:17.460Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "fix-cross-filter-months"
+}

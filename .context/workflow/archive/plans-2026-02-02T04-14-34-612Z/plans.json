@@ -1,0 +1,13 @@
+{
+  "active": [
+    {
+      "slug": "add-user-role-selection",
+      "path": "plans/add-user-role-selection.md",
+      "title": "Mudar \"Adicionar Professor\" para \"Adicionar Usuario\" com selecao de funcao",
+      "linkedAt": "2026-02-02T04:02:41.980Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "add-user-role-selection"
+}

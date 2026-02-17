@@ -1,0 +1,40 @@
+project:
+  name: "class-display-ordering-reports"
+  scale: MEDIUM
+  started: "2026-02-01T01:34:29.945Z"
+  current_phase: V
+
+phases:
+  P:
+    status: filled
+    started_at: "2026-02-01T01:34:29.945Z"
+    completed_at: "2026-02-01T01:34:33.815Z"
+  R:
+    status: completed
+    started_at: "2026-02-01T01:34:33.817Z"
+    completed_at: "2026-02-01T01:34:37.120Z"
+  E:
+    status: filled
+    started_at: "2026-02-01T01:34:37.122Z"
+    completed_at: "2026-02-01T01:41:47.534Z"
+  V:
+    status: in_progress
+    started_at: "2026-02-01T01:41:47.537Z"
+  C:
+    status: skipped
+    reason: "Not required for scale MEDIUM"
+
+execution:
+  history:
+    - timestamp: "2026-02-01T01:41:47.537Z"
+      phase: V
+      action: started
+  last_activity: "2026-02-01T01:41:47.537Z"
+  resume_context: "Fase V (Validação) em progresso"
+
+approval:
+  plan_created: false
+  plan_approved: true
+  approved_by: "system-migration"
+  approved_at: "2026-02-01T01:34:37.122Z"
+

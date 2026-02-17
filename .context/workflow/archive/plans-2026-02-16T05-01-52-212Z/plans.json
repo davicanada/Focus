@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "admin-professor-mode-navigation",
+      "path": "plans/admin-professor-mode-navigation.md",
+      "title": "Modo Professor para Administrador - Navegacao Unificada",
+      "summary": "Permitir que administradores registrem ocorrencias com a mesma experiencia do professor, especialmente no mobile",
+      "linkedAt": "2026-02-07T04:27:58.990Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "admin-professor-mode-navigation"
+}

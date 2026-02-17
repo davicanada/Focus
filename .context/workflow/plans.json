@@ -1,22 +1,14 @@
 {
   "active": [
     {
-      "slug": "analytics-dashboard-improvements-v2",
-      "path": "plans/analytics-dashboard-improvements-v2.md",
-      "title": "Melhorias nos Graficos do Analytics Dashboard",
-      "summary": "Categoria como barras, severidade com labels, novo grafico por nivel, melhorias em alunos e turmas",
-      "linkedAt": "2026-01-25T06:50:48.103Z",
-      "status": "active"
-    },
-    {
-      "slug": "analytics-year-filter-chart-improvements",
-      "path": "plans/analytics-year-filter-chart-improvements.md",
-      "title": "Analytics - Filtro de Ano + Melhorias nos Graficos",
-      "summary": "Adicionar filtro de ano, ajustar grafico mensal para Jan-Dez, corrigir truncamento de categorias e responsividade com sidebar",
-      "linkedAt": "2026-01-25T10:39:46.881Z",
+      "slug": "pdf-import-students",
+      "path": "plans/pdf-import-students.md",
+      "title": "Importacao de turmas e alunos via PDF",
+      "summary": "Botao \"Importar PDF\" na pagina de turmas com parser SEDU-ES como padrao e opcao AI (Gemini/Groq) para outros formatos. Preview antes de confirmar.",
+      "linkedAt": "2026-02-16T06:50:08.486Z",
       "status": "active"
     }
   ],
   "completed": [],
-  "primary": "analytics-dashboard-improvements-v2"
+  "primary": "pdf-import-students"
 }

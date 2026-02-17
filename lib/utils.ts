@@ -214,6 +214,16 @@ export const CHART_COLORS = {
     integral: '#10b981',   // Emerald 500 - dia todo
     nao_informado: '#6b7280', // Gray 500 - sem informação
   },
+
+  // === SUBCATEGORIAS DE OCORRÊNCIA ===
+  subcategory: {
+    'Pedagógico': '#3B82F6',              // Blue 500
+    'Comportamento Inadequado': '#F59E0B', // Amber 500
+    'Indisciplinar Leve': '#EAB308',       // Yellow 500
+    'Indisciplinar Grave': '#EF4444',      // Red 500
+    'Infracional': '#DC2626',             // Dark Red 600
+    'Não classificado': '#9CA3AF',        // Gray 400
+  } as Record<string, string>,
 };
 
 // Cores para Analytics - Design Compacto (tons de azul suave harmonizados com #153461)

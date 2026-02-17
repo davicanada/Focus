@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "multi-institution-users",
+      "path": "plans/multi-institution-users.md",
+      "title": "Suporte a Usuários Multi-Instituição",
+      "summary": "Permitir que um mesmo usuário pertença a múltiplas instituições, com tela de seleção pós-login e possibilidade de ocultar instituições inativas.",
+      "linkedAt": "2026-02-02T23:58:05.949Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "multi-institution-users"
+}

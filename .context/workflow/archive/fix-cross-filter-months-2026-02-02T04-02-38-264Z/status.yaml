@@ -1,0 +1,37 @@
+project:
+  name: "fix-cross-filter-months"
+  scale: SMALL
+  started: "2026-02-02T03:13:13.710Z"
+  current_phase: V
+
+phases:
+  P:
+    status: filled
+    started_at: "2026-02-02T03:13:13.710Z"
+    completed_at: "2026-02-02T03:13:20.443Z"
+  R:
+    status: skipped
+    reason: "Not required for scale SMALL"
+  E:
+    status: filled
+    started_at: "2026-02-02T03:13:20.445Z"
+    completed_at: "2026-02-02T03:15:41.145Z"
+  V:
+    status: in_progress
+    started_at: "2026-02-02T03:15:41.148Z"
+  C:
+    status: skipped
+    reason: "Not required for scale SMALL"
+
+execution:
+  history:
+    - timestamp: "2026-02-02T03:15:41.148Z"
+      phase: V
+      action: started
+  last_activity: "2026-02-02T03:15:41.148Z"
+  resume_context: "Fase V (Validação) em progresso"
+
+approval:
+  plan_created: true
+  plan_approved: false
+

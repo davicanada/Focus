@@ -1,0 +1,22 @@
+project:
+  name: "fix-help-text-usuarios"
+  scale: QUICK
+  started: "2026-02-02T04:14:34.615Z"
+  current_phase: E
+
+phases:
+  P:
+    status: skipped
+    reason: "Not required for scale QUICK"
+  R:
+    status: skipped
+    reason: "Not required for scale QUICK"
+  E:
+    status: in_progress
+    started_at: "2026-02-02T04:14:34.615Z"
+  V:
+    status: pending
+  C:
+    status: skipped
+    reason: "Not required for scale QUICK"
+

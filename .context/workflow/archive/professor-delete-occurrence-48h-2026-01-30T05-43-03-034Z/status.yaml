@@ -1,0 +1,48 @@
+project:
+  name: "professor-delete-occurrence-48h"
+  scale: SMALL
+  started: "2026-01-30T05:13:48.784Z"
+  current_phase: V
+
+phases:
+  P:
+    status: filled
+    started_at: "2026-01-30T05:13:48.784Z"
+    completed_at: "2026-01-30T05:13:58.144Z"
+  R:
+    status: skipped
+    reason: "Not required for scale SMALL"
+  E:
+    status: filled
+    started_at: "2026-01-30T05:13:58.146Z"
+    completed_at: "2026-01-30T05:16:55.044Z"
+  V:
+    status: completed
+    started_at: "2026-01-30T05:16:55.046Z"
+    completed_at: "2026-01-30T05:16:58.722Z"
+    outputs:
+      - path: "build passing"
+        status: filled
+      - path: "no type errors"
+        status: filled
+  C:
+    status: skipped
+    reason: "Not required for scale SMALL"
+
+execution:
+  history:
+    - timestamp: "2026-01-30T05:16:58.722Z"
+      phase: V
+      action: completed
+  last_activity: "2026-01-30T05:16:58.722Z"
+  resume_context: "Fase V (Validação) concluída"
+
+settings:
+  autonomous_mode: true
+  require_plan: true
+  require_approval: false
+
+approval:
+  plan_created: true
+  plan_approved: false
+

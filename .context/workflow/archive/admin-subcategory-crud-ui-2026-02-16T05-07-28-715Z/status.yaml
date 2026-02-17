@@ -1,0 +1,37 @@
+project:
+  name: "admin-subcategory-crud-ui"
+  scale: SMALL
+  started: "2026-02-16T05:01:52.217Z"
+  current_phase: V
+
+phases:
+  P:
+    status: filled
+    started_at: "2026-02-16T05:01:52.217Z"
+    completed_at: "2026-02-16T05:02:38.786Z"
+  R:
+    status: skipped
+    reason: "Not required for scale SMALL"
+  E:
+    status: filled
+    started_at: "2026-02-16T05:02:38.789Z"
+    completed_at: "2026-02-16T05:03:58.463Z"
+  V:
+    status: in_progress
+    started_at: "2026-02-16T05:03:58.466Z"
+  C:
+    status: skipped
+    reason: "Not required for scale SMALL"
+
+execution:
+  history:
+    - timestamp: "2026-02-16T05:03:58.466Z"
+      phase: V
+      action: started
+  last_activity: "2026-02-16T05:03:58.466Z"
+  resume_context: "Fase V (Validação) em progresso"
+
+approval:
+  plan_created: true
+  plan_approved: false
+

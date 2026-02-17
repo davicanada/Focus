@@ -1,0 +1,37 @@
+project:
+  name: "subcategory-inline-management"
+  scale: SMALL
+  started: "2026-02-16T05:07:28.727Z"
+  current_phase: V
+
+phases:
+  P:
+    status: filled
+    started_at: "2026-02-16T05:07:28.727Z"
+    completed_at: "2026-02-16T05:08:08.316Z"
+  R:
+    status: skipped
+    reason: "Not required for scale SMALL"
+  E:
+    status: filled
+    started_at: "2026-02-16T05:08:08.319Z"
+    completed_at: "2026-02-16T05:11:01.954Z"
+  V:
+    status: in_progress
+    started_at: "2026-02-16T05:11:01.962Z"
+  C:
+    status: skipped
+    reason: "Not required for scale SMALL"
+
+execution:
+  history:
+    - timestamp: "2026-02-16T05:11:01.962Z"
+      phase: V
+      action: started
+  last_activity: "2026-02-16T05:11:01.962Z"
+  resume_context: "Fase V (Validação) em progresso"
+
+approval:
+  plan_created: true
+  plan_approved: false
+

@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "ai-analytics-judgmental-filter",
+      "path": "plans/ai-analytics-judgmental-filter.md",
+      "title": "Filtro de Perguntas Prejudiciais/Julgamentais no AI Analytics",
+      "summary": "Bloquear perguntas que emitam juízo de valor sobre alunos para proteger dignidade de menores",
+      "linkedAt": "2026-01-30T05:43:07.631Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "ai-analytics-judgmental-filter"
+}

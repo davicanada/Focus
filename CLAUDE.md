@@ -667,3 +667,49 @@ A variável `DATABASE_URL` está configurada em `.env.local` e dá acesso total 
     - Admin nao pode desativar a si mesmo (botao oculto)
     - Sem exclusao permanente — preserva dados transacionados (ocorrencias registradas)
 - Build passando com sucesso
+
+## Sessao Atual (15/02/2026)
+- Subcategorias de Ocorrencias implementadas:
+  - **Plano detalhado**: `.context/plans/add-occurrence-subcategories.md`
+  - **Migration SQL** (`add_occurrence_subcategories`): Executada via MCP
+    - Tabela `occurrence_subcategories` com 5 subcategorias padrao do sistema
+    - Padrao: Pedagogico, Comportamento Inadequado, Indisciplinar Leve, Indisciplinar Grave, Infracional
+    - FK `subcategory_id` em `occurrence_types` (ON DELETE SET NULL)
+    - RLS: leitura de padrao + propria instituicao, CRUD apenas admin
+    - Indices: institution, default, occurrence_types.subcategory_id
+  - **Tipos TypeScript** (`types/index.ts`):
+    - Nova interface `OccurrenceSubcategory`
+    - `OccurrenceType` com `subcategory_id` e `subcategory` (JOIN opcional)
+  - **APIs criadas**:
+    - `GET/POST /api/occurrence-subcategories` - Listar e criar subcategorias
+    - `PUT/DELETE /api/occurrence-subcategories/[id]` - Editar e soft delete
+    - Bloqueio de edicao/exclusao de subcategorias padrao (is_default=true)
+    - Validacao de nome duplicado por instituicao
+  - **CRUD Tipos de Ocorrencia** (`app/admin/tipos-ocorrencias/page.tsx`):
+    - Dropdown "Subcategoria" no modal de criar/editar tipo
+    - Coluna "Subcategoria" com badge colorido na tabela
+    - JOIN de subcategoria no select de tipos
+  - **Analytics Dashboard** (`components/analytics/AnalyticsDashboard.tsx`):
+    - Grafico donut de Severidade SUBSTITUIDO por donut de Subcategoria
+    - Novo filtro `subcategories: string[]` no FilterState
+    - Cross-filtering completo com subcategoria em TODOS os graficos (8 blocos)
+    - Cores via `CHART_COLORS.subcategory` + cor da subcategoria do banco
+    - Click handler `handleSubcategoryClick` com suporte a Ctrl+Click
+  - **Registro de Ocorrencias** (`app/professor/registrar/page.tsx`):
+    - Select de tipo exibe subcategoria: "Atraso (leve) - Indisciplinar Leve"
+    - JOIN de subcategoria na query de tipos
+  - **Ocorrencias do Professor** (`app/professor/ocorrencias/page.tsx`):
+    - Coluna "Subcategoria" na tabela com badge colorido
+    - Tipo local `OccurrenceWithRelations` atualizado com subcategory
+  - **Dashboards** (admin, viewer):
+    - Badge de subcategoria nas ocorrencias recentes
+    - JOIN de subcategoria na query de recentes
+  - **OccurrenceDetailModal**: Exibe subcategoria no detalhe
+  - **AI Analytics** (`lib/ai/shared.ts`):
+    - Tabela `occurrence_subcategories` adicionada ao schema
+    - Campo `subcategory_id` documentado em `occurrence_types`
+  - **Relatorios** (`app/admin/relatorios/*/page.tsx`):
+    - JOIN de subcategoria nas queries de periodo e aluno
+  - **Cores** (`lib/utils.ts`):
+    - `CHART_COLORS.subcategory` com 5 cores padrao + "Nao classificado"
+  - Build passando com sucesso

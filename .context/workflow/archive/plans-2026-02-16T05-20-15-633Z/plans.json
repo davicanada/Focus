@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "subcategory-inline-management",
+      "path": "plans/subcategory-inline-management.md",
+      "title": "Subcategorias inline no modal de tipo + link Gerenciar",
+      "summary": "Trocar card separado por criacao inline no dropdown do modal de tipo + link \"Gerenciar subcategorias\" para editar/excluir.",
+      "linkedAt": "2026-02-16T05:08:04.761Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "subcategory-inline-management"
+}

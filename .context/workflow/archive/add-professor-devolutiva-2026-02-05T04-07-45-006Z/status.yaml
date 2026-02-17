@@ -1,0 +1,37 @@
+project:
+  name: "add-professor-devolutiva"
+  scale: SMALL
+  started: "2026-02-04T06:59:06.311Z"
+  current_phase: V
+
+phases:
+  P:
+    status: filled
+    started_at: "2026-02-04T06:59:06.311Z"
+    completed_at: "2026-02-04T07:00:14.806Z"
+  R:
+    status: skipped
+    reason: "Not required for scale SMALL"
+  E:
+    status: filled
+    started_at: "2026-02-04T07:00:14.809Z"
+    completed_at: "2026-02-04T07:02:45.829Z"
+  V:
+    status: in_progress
+    started_at: "2026-02-04T07:02:45.835Z"
+  C:
+    status: skipped
+    reason: "Not required for scale SMALL"
+
+execution:
+  history:
+    - timestamp: "2026-02-04T07:02:45.835Z"
+      phase: V
+      action: started
+  last_activity: "2026-02-04T07:02:45.835Z"
+  resume_context: "Fase V (Validação) em progresso"
+
+approval:
+  plan_created: true
+  plan_approved: false
+

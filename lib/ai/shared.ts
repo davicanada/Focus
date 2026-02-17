@@ -76,10 +76,17 @@ SCHEMA DO BANCO DE DADOS:
    - IMPORTANTE: Nao selecione colunas de identificacao pessoal (full_name, enrollment_number)
    - Use apenas s.id para referenciar alunos
 
-6. occurrence_types (id, institution_id, category, severity, description, is_active)
+6. occurrence_types (id, institution_id, category, severity, subcategory_id, description, is_active)
    - Tipos de ocorrencia disponiveis
    - category: tipo da ocorrencia (ex: 'Atraso', 'Briga', 'Uso de Celular')
    - severity: 'leve', 'media', 'grave'
+   - subcategory_id: FK para occurrence_subcategories
+
+6b. occurrence_subcategories (id, institution_id, name, description, color, is_default, is_active)
+   - Subcategorias de ocorrencia
+   - name: 'Pedagogico', 'Comportamento Inadequado', 'Indisciplinar Leve', 'Indisciplinar Grave', 'Infracional'
+   - is_default: true para subcategorias padrao do sistema
+   - JOIN: occurrence_types.subcategory_id = occurrence_subcategories.id
 
 7. occurrences (id, institution_id, student_id, occurrence_type_id, registered_by, occurrence_date, created_at)
    - Ocorrencias registradas

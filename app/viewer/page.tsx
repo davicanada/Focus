@@ -123,7 +123,7 @@ export default function ViewerDashboardPage() {
           .select(`
             *,
             student:students(full_name, class_id),
-            occurrence_type:occurrence_types(category, severity),
+            occurrence_type:occurrence_types(category, severity, subcategory:occurrence_subcategories(name, color)),
             registered_by_user:users!occurrences_registered_by_fkey(full_name),
             class_at_occurrence:classes!occurrences_class_id_at_occurrence_fkey(name)
           `)
@@ -295,6 +295,14 @@ export default function ViewerDashboardPage() {
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {occurrence.occurrence_type?.category}
+                        {occurrence.occurrence_type?.subcategory && (
+                          <span
+                            className="ml-2 inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white"
+                            style={{ backgroundColor: occurrence.occurrence_type.subcategory.color || '#6B7280' }}
+                          >
+                            {occurrence.occurrence_type.subcategory.name}
+                          </span>
+                        )}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Ocorreu em {formatDateTime(occurrence.occurrence_date)} • Registrado por {occurrence.registered_by_user?.full_name}

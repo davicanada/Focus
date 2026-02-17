@@ -1,0 +1,46 @@
+project:
+  name: "fix-excel-registered-by"
+  scale: QUICK
+  started: "2026-01-30T03:37:33.739Z"
+  current_phase: V
+
+phases:
+  P:
+    status: skipped
+    reason: "Not required for scale QUICK"
+  R:
+    status: skipped
+    reason: "Not required for scale QUICK"
+  E:
+    status: filled
+    started_at: "2026-01-30T03:37:33.739Z"
+    completed_at: "2026-01-30T03:37:48.543Z"
+  V:
+    status: completed
+    started_at: "2026-01-30T03:37:48.547Z"
+    completed_at: "2026-01-30T03:37:59.342Z"
+    outputs:
+      - path: "policy verified: Users can read same institution users"
+        status: filled
+      - path: "security validated: get_user_institution_ids is SECURITY DEFINER"
+        status: filled
+      - path: "isolation confirmed: cross-institution data not exposed"
+        status: filled
+  C:
+    status: skipped
+    reason: "Not required for scale QUICK"
+
+execution:
+  history:
+    - timestamp: "2026-01-30T03:37:59.342Z"
+      phase: V
+      action: completed
+  last_activity: "2026-01-30T03:37:59.342Z"
+  resume_context: "Fase V (Validação) concluída"
+
+approval:
+  plan_created: false
+  plan_approved: true
+  approved_by: "system-migration"
+  approved_at: "2026-01-30T03:37:48.543Z"
+

@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "fix-devolutiva-action-type-validation",
+      "path": "plans/fix-devolutiva-action-type-validation.md",
+      "title": "Corrigir Validacao de Tipo de Acao na Devolutiva",
+      "summary": "Corrigir erro \"Tipo de acao invalido\" ao registrar devolutiva com tipos personalizados criados pelo admin",
+      "linkedAt": "2026-02-07T02:13:24.659Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "fix-devolutiva-action-type-validation"
+}

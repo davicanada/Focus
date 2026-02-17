@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "fix-ai-sensitive-word-boundary",
+      "path": "plans/fix-ai-sensitive-word-boundary.md",
+      "title": "Corrigir detecção de palavras sensíveis no AI Analytics",
+      "summary": "A função `isSensitiveQuestion` usa `.includes()` que detecta substrings, causando falsos positivos quando palavras como \"quantidade\" contêm \"idade\". Solução: usar regex com word boundaries.",
+      "linkedAt": "2026-02-05T04:07:49.551Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "fix-ai-sensitive-word-boundary"
+}
