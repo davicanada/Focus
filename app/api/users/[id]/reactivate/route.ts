@@ -27,14 +27,14 @@ export async function PUT(
       .eq('id', user.id)
       .single();
 
-    const { data: userInstitution } = await serviceClient
+    const { data: userInstitutions } = await serviceClient
       .from('user_institutions')
       .select('role, institution_id')
       .eq('user_id', user.id)
-      .eq('is_active', true)
-      .single();
+      .eq('is_active', true);
 
-    const isAdmin = userInstitution?.role === 'admin';
+    const userInstitution = userInstitutions?.find(ui => ui.role === 'admin') || userInstitutions?.[0] || null;
+    const isAdmin = userInstitutions?.some(ui => ui.role === 'admin') ?? false;
     const isMaster = currentUser?.is_master === true;
 
     if (!isAdmin && !isMaster) {
