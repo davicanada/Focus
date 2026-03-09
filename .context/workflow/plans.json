@@ -1,14 +1,14 @@
 {
   "active": [
     {
-      "slug": "cascade-soft-delete-turma-alunos",
-      "path": "plans/cascade-soft-delete-turma-alunos.md",
-      "title": "Soft Delete em Cascata ao Excluir Turma",
-      "summary": "Ao mover uma turma para a lixeira, soft-delete automático em todos os alunos da turma sem intervenção manual. Exclusão permanente bloqueada se qualquer aluno tiver ocorrências históricas. Restauração da turma também restaura os alunos automaticamente.",
-      "linkedAt": "2026-03-09T04:51:40.666Z",
+      "slug": "badge-ocorrencias-graves-pendentes",
+      "path": "plans/badge-ocorrencias-graves-pendentes.md",
+      "title": "Badge de Ocorrências Graves Pendentes no Sidebar",
+      "summary": "Badge vermelho na aba \"Ocorrências\" do sidebar (admin e viewer) mostrando a contagem de ocorrências com `severity='grave'` e `status='pending'`. Aparece automaticamente quando uma ocorrência grave é registrada e desaparece conforme são tratadas.",
+      "linkedAt": "2026-03-09T05:15:05.162Z",
       "status": "active"
     }
   ],
   "completed": [],
-  "primary": "cascade-soft-delete-turma-alunos"
+  "primary": "badge-ocorrencias-graves-pendentes"
 }

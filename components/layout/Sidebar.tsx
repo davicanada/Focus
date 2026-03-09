@@ -91,6 +91,7 @@ const adminProfessorModeNavItems: NavItem[] = [
 export function Sidebar({ role, institutionName, isOpen = false, onClose, collapsed = false, onToggleCollapse, hasMultipleInstitutions = false, adminMode = 'admin', onAdminModeChange }: SidebarProps) {
   const pathname = usePathname();
   const [unreadAlerts, setUnreadAlerts] = useState(0);
+  const [pendingGraves, setPendingGraves] = useState(0);
 
   // Fetch unread alerts count for admin and admin_viewer
   // Uses Visibility API to only poll when tab is visible (saves ~80% requests)
@@ -109,13 +110,27 @@ export function Sidebar({ role, institutionName, isOpen = false, onClose, collap
       }
     };
 
+    const fetchPendingGraves = async () => {
+      try {
+        const response = await fetch('/api/occurrences/pending-graves/count');
+        if (response.ok) {
+          const data = await response.json();
+          setPendingGraves(data.count || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching pending graves count:', error);
+      }
+    };
+
     // Initial fetch
     fetchUnreadCount();
+    fetchPendingGraves();
 
     // Fetch when tab becomes visible again
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         fetchUnreadCount();
+        fetchPendingGraves();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -124,6 +139,7 @@ export function Sidebar({ role, institutionName, isOpen = false, onClose, collap
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') {
         fetchUnreadCount();
+        fetchPendingGraves();
       }
     }, 300000); // 5 minutes
 
@@ -142,21 +158,21 @@ export function Sidebar({ role, institutionName, isOpen = false, onClose, collap
         if (adminMode === 'professor') {
           return adminProfessorModeNavItems;
         }
-        // Add badge to alerts item
-        return adminNavItems.map(item =>
-          item.href === '/admin/alertas' && unreadAlerts > 0
-            ? { ...item, badge: unreadAlerts }
-            : item
-        );
+        // Add badge to alerts and occurrences items
+        return adminNavItems.map(item => {
+          if (item.href === '/admin/alertas' && unreadAlerts > 0) return { ...item, badge: unreadAlerts };
+          if (item.href === '/admin/ocorrencias' && pendingGraves > 0) return { ...item, badge: pendingGraves };
+          return item;
+        });
       case 'professor':
         return professorNavItems;
       case 'admin_viewer':
-        // Add badge to alerts item for viewer
-        return viewerNavItems.map(item =>
-          item.href === '/viewer/alertas' && unreadAlerts > 0
-            ? { ...item, badge: unreadAlerts }
-            : item
-        );
+        // Add badge to alerts and occurrences items for viewer
+        return viewerNavItems.map(item => {
+          if (item.href === '/viewer/alertas' && unreadAlerts > 0) return { ...item, badge: unreadAlerts };
+          if (item.href === '/viewer/ocorrencias' && pendingGraves > 0) return { ...item, badge: pendingGraves };
+          return item;
+        });
       default:
         return [];
     }

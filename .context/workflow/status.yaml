@@ -1,36 +1,40 @@
 project:
-  name: "cascade-soft-delete-turma-alunos"
-  scale: MEDIUM
-  started: "2026-03-09T04:49:49.509Z"
+  name: "badge-ocorrencias-graves-pendentes"
+  scale: SMALL
+  started: "2026-03-09T05:14:18.350Z"
   current_phase: V
 
 phases:
   P:
     status: filled
-    started_at: "2026-03-09T04:49:49.509Z"
-    completed_at: "2026-03-09T04:54:14.482Z"
+    started_at: "2026-03-09T05:14:18.350Z"
+    completed_at: "2026-03-09T05:16:16.572Z"
   R:
-    status: filled
-    started_at: "2026-03-09T04:54:14.486Z"
-    completed_at: "2026-03-09T04:54:19.454Z"
+    status: skipped
+    reason: "Not required for scale SMALL"
   E:
     status: filled
-    started_at: "2026-03-09T04:54:19.458Z"
-    completed_at: "2026-03-09T05:00:22.778Z"
+    started_at: "2026-03-09T05:16:16.574Z"
+    completed_at: "2026-03-09T05:19:43.963Z"
   V:
     status: in_progress
-    started_at: "2026-03-09T05:00:22.784Z"
+    started_at: "2026-03-09T05:19:43.967Z"
   C:
     status: skipped
-    reason: "Not required for scale MEDIUM"
+    reason: "Not required for scale SMALL"
 
 execution:
   history:
-    - timestamp: "2026-03-09T05:00:22.784Z"
+    - timestamp: "2026-03-09T05:19:43.967Z"
       phase: V
       action: started
-  last_activity: "2026-03-09T05:00:22.784Z"
+  last_activity: "2026-03-09T05:19:43.967Z"
   resume_context: "Fase V (Validação) em progresso"
+
+settings:
+  autonomous_mode: false
+  require_plan: true
+  require_approval: true
 
 approval:
   plan_created: true
