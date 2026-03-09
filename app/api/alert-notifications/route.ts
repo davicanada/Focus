@@ -38,7 +38,18 @@ export async function GET(request: NextRequest) {
       .select(`
         *,
         alert_rule:alert_rules(id, name, scope_type, filter_type),
-        occurrence:occurrences(id, occurrence_date, student:students(id, full_name))
+        occurrence:occurrences(
+          id,
+          occurrence_date,
+          status,
+          description,
+          student:students(id, full_name),
+          occurrence_type:occurrence_types(
+            category,
+            severity,
+            subcategory:occurrence_subcategories(name, color)
+          )
+        )
       `)
       .eq('institution_id', userInstitution.institution_id)
       .order('triggered_at', { ascending: false })

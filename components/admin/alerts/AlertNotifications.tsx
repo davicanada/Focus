@@ -2,17 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { Bell, CheckCheck, Eye, Clock, AlertTriangle } from 'lucide-react';
+import { Bell, CheckCheck, Eye, Clock, AlertTriangle, ClipboardList } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
+import { OccurrenceStatusBadge } from '@/components/occurrences/OccurrenceStatusBadge';
+import { AlertOccurrenceModal } from './AlertOccurrenceModal';
 import { formatDateTime } from '@/lib/utils';
-import type { AlertNotification } from '@/types';
+import type { AlertNotification, OccurrenceStatus } from '@/types';
 
 export function AlertNotifications() {
     const [notifications, setNotifications] = useState<AlertNotification[]>([]);
     const [loadingNotifications, setLoadingNotifications] = useState(false);
+    const [selectedNotification, setSelectedNotification] = useState<AlertNotification | null>(null);
 
     useEffect(() => {
         loadNotifications();
@@ -74,7 +77,23 @@ export function AlertNotifications() {
         }
     };
 
+    const handleOpenModal = async (notification: AlertNotification) => {
+        setSelectedNotification(notification);
+        // Marcar como lida ao abrir
+        if (!notification.is_read) {
+            handleMarkAsRead(notification.id);
+        }
+    };
+
+    const handleStatusChanged = (notificationId: string, newStatus: OccurrenceStatus) => {
+        setNotifications(prev => prev.map(n => {
+            if (n.id !== notificationId || !n.occurrence) return n;
+            return { ...n, occurrence: { ...n.occurrence, status: newStatus } };
+        }));
+    };
+
     const unreadCount = notifications.filter(n => !n.is_read).length;
+    const pendingCount = notifications.filter(n => n.occurrence?.status === 'pending').length;
 
     return (
         <div className="space-y-6">
@@ -99,7 +118,7 @@ export function AlertNotifications() {
             </div>
 
             {/* Stats */}
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-4">
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -130,6 +149,16 @@ export function AlertNotifications() {
                         <div className="text-2xl font-bold text-green-600">
                             {notifications.length - unreadCount}
                         </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                            Ocorrências Pendentes
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
                     </CardContent>
                 </Card>
             </div>
@@ -175,12 +204,12 @@ export function AlertNotifications() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-start justify-between gap-2">
-                                            <div>
+                                            <div className="flex-1 min-w-0">
                                                 <p className="font-medium">{notification.rule_name}</p>
                                                 <p className="text-sm text-muted-foreground mt-1">
                                                     {notification.message}
                                                 </p>
-                                                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
                                                     <span className="flex items-center gap-1">
                                                         <Clock className="h-3 w-3" />
                                                         {formatDateTime(notification.triggered_at)}
@@ -188,17 +217,37 @@ export function AlertNotifications() {
                                                     <Badge variant="outline" className="text-xs">
                                                         {notification.occurrence_count} ocorrência(s)
                                                     </Badge>
+                                                    {notification.occurrence && (
+                                                        <OccurrenceStatusBadge
+                                                            status={notification.occurrence.status}
+                                                            className="text-xs"
+                                                        />
+                                                    )}
                                                 </div>
                                             </div>
-                                            {!notification.is_read && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleMarkAsRead(notification.id)}
-                                                >
-                                                    <Eye className="h-4 w-4" />
-                                                </Button>
-                                            )}
+                                            <div className="flex items-center gap-1 shrink-0">
+                                                {notification.occurrence && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleOpenModal(notification)}
+                                                        title="Tratar ocorrência"
+                                                    >
+                                                        <ClipboardList className="h-4 w-4 mr-1" />
+                                                        Tratar
+                                                    </Button>
+                                                )}
+                                                {!notification.is_read && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => handleMarkAsRead(notification.id)}
+                                                        title="Marcar como lida"
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -207,6 +256,14 @@ export function AlertNotifications() {
                     )}
                 </CardContent>
             </Card>
+            {selectedNotification && (
+                <AlertOccurrenceModal
+                    isOpen={!!selectedNotification}
+                    onClose={() => setSelectedNotification(null)}
+                    notification={selectedNotification}
+                    onStatusChanged={handleStatusChanged}
+                />
+            )}
         </div>
     );
 }

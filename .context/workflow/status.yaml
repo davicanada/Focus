@@ -1,37 +1,39 @@
 project:
-  name: "pdf-import-students"
-  scale: LARGE
-  started: "2026-02-16T06:50:01.547Z"
-  current_phase: R
+  name: "filtro-severidade-ocorrencias"
+  scale: SMALL
+  started: "2026-03-09T04:13:34.865Z"
+  current_phase: P
 
 phases:
   P:
-    status: filled
-    started_at: "2026-02-16T06:50:01.547Z"
-    completed_at: "2026-02-16T06:50:13.054Z"
-  R:
     status: in_progress
-    started_at: "2026-02-16T06:50:13.060Z"
+    started_at: "2026-03-09T04:13:34.865Z"
+  R:
+    status: skipped
+    reason: "Not required for scale SMALL"
   E:
     status: pending
   V:
     status: pending
   C:
-    status: pending
+    status: skipped
+    reason: "Not required for scale SMALL"
 
 execution:
   history:
-    - timestamp: "2026-02-16T06:50:18.057Z"
-      phase: R
-      action: plan_approved
-      approved_by: "solo-dev"
-  last_activity: "2026-02-16T06:50:18.057Z"
-  resume_context: "Plano aprovado - pronto para execução"
+    - timestamp: "2026-03-09T04:13:37.614Z"
+      phase: P
+      action: plan_linked
+      plan: "filtro-severidade-ocorrencias"
+  last_activity: "2026-03-09T04:13:37.614Z"
+  resume_context: "Plano vinculado - aguardando revisão"
+
+settings:
+  autonomous_mode: false
+  require_plan: true
+  require_approval: true
 
 approval:
   plan_created: true
-  plan_approved: true
-  approved_by: "solo-dev"
-  approved_at: "2026-02-16T06:50:18.057Z"
-  approval_notes: "Plan approved by user. Client-side PDF parsing with pdfjs-dist, SEDU-ES regex parser, AI fallback, preview modal on turmas page."
+  plan_approved: false
 

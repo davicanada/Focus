@@ -1,14 +1,14 @@
 {
   "active": [
     {
-      "slug": "pdf-import-students",
-      "path": "plans/pdf-import-students.md",
-      "title": "Importacao de turmas e alunos via PDF",
-      "summary": "Botao \"Importar PDF\" na pagina de turmas com parser SEDU-ES como padrao e opcao AI (Gemini/Groq) para outros formatos. Preview antes de confirmar.",
-      "linkedAt": "2026-02-16T06:50:08.486Z",
+      "slug": "filtro-severidade-ocorrencias",
+      "path": "plans/filtro-severidade-ocorrencias.md",
+      "title": "Filtro de Severidade nas Páginas de Ocorrências",
+      "summary": "Adicionar filtro de Severidade (Todas / Graves / Médias / Leves) com padrão **Graves**",
+      "linkedAt": "2026-03-09T04:13:37.609Z",
       "status": "active"
     }
   ],
   "completed": [],
-  "primary": "pdf-import-students"
+  "primary": "filtro-severidade-ocorrencias"
 }
