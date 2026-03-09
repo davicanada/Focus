@@ -52,6 +52,7 @@ export default function ViewerOcorrenciasPage() {
   const [filterClass, setFilterClass] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterType, setFilterType] = useState('');
+  const [filterSeverity, setFilterSeverity] = useState('grave');
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -235,7 +236,8 @@ export default function ViewerOcorrenciasPage() {
     const matchesStatus = !filterStatus || occurrence.status === filterStatus;
     const matchesType = !filterType ||
       occurrence.occurrence_type?.category === occurrenceTypes.find(t => t.id === filterType)?.category;
-    return matchesSearch && matchesClass && matchesStatus && matchesType;
+    const matchesSeverity = !filterSeverity || occurrence.occurrence_type?.severity === filterSeverity;
+    return matchesSearch && matchesClass && matchesStatus && matchesType && matchesSeverity;
   });
 
   if (isLoading) {
@@ -362,6 +364,16 @@ export default function ViewerOcorrenciasPage() {
                 {occurrenceTypes.map((t) => (
                   <option key={t.id} value={t.id}>{t.category}</option>
                 ))}
+              </Select>
+              <Select
+                value={filterSeverity}
+                onChange={(e) => setFilterSeverity(e.target.value)}
+                className="w-40"
+              >
+                <option value="">Todas ocorrências</option>
+                <option value="leve">Leves</option>
+                <option value="media">Médias</option>
+                <option value="grave">Graves</option>
               </Select>
             </div>
           </CardContent>
