@@ -51,6 +51,11 @@ export default function TurmasPage() {
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [saving, setSaving] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState<{ open: boolean; classItem: Class | null; studentCount: number }>({
+    open: false,
+    classItem: null,
+    studentCount: 0,
+  });
 
   // Form state
   const [formData, setFormData] = useState({
@@ -218,17 +223,54 @@ export default function TurmasPage() {
   };
 
   const handleDelete = async (classItem: Class) => {
-    if (!confirm(`Deseja mover "${classItem.name}" para a lixeira?`)) return;
+    const supabase = createClient();
+    const { count } = await supabase
+      .from('students')
+      .select('id', { count: 'exact', head: true })
+      .eq('class_id', classItem.id)
+      .eq('is_active', true);
 
+    const studentCount = count || 0;
+
+    if (studentCount > 0) {
+      setDeleteConfirmModal({ open: true, classItem, studentCount });
+      return;
+    }
+
+    // Sem alunos: soft-delete direto
+    await executeSoftDelete(classItem);
+  };
+
+  const executeSoftDelete = async (classItem: Class) => {
     try {
+      // 1. Buscar IDs dos alunos ativos da turma
       const supabase = createClient();
+      const { data: students } = await supabase
+        .from('students')
+        .select('id')
+        .eq('class_id', classItem.id)
+        .eq('is_active', true);
+
+      // 2. Se houver alunos, chamar bulk-deactivate
+      if (students && students.length > 0) {
+        const studentIds = students.map((s: { id: string }) => s.id);
+        const res = await fetch('/api/students/bulk-deactivate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentIds, reason: `Turma ${classItem.name} movida para a lixeira` }),
+        });
+        if (!res.ok) throw new Error('Erro ao desativar alunos');
+      }
+
+      // 3. Soft-delete da turma
       const { error } = await supabase
         .from('classes')
         .update({ deleted_at: new Date().toISOString(), is_active: false })
         .eq('id', classItem.id);
 
       if (error) throw error;
-      toast.success('Turma movida para lixeira');
+      toast.success('Turma e alunos movidos para a lixeira');
+      setDeleteConfirmModal({ open: false, classItem: null, studentCount: 0 });
       loadClasses(currentInstitution!.id);
     } catch (error) {
       console.error('Error deleting class:', error);
@@ -239,13 +281,33 @@ export default function TurmasPage() {
   const handleRestore = async (classItem: Class) => {
     try {
       const supabase = createClient();
+
+      // 1. Buscar alunos inativos da turma (desativados junto com ela)
+      const { data: students } = await supabase
+        .from('students')
+        .select('id')
+        .eq('class_id', classItem.id)
+        .eq('is_active', false)
+        .not('deleted_at', 'is', null);
+
+      // 2. Se houver alunos, restaurar em bulk
+      if (students && students.length > 0) {
+        const studentIds = students.map((s: { id: string }) => s.id);
+        await fetch('/api/students/bulk-restore', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentIds }),
+        });
+      }
+
+      // 3. Restaurar a turma
       const { error } = await supabase
         .from('classes')
         .update({ deleted_at: null, is_active: true })
         .eq('id', classItem.id);
 
       if (error) throw error;
-      toast.success('Turma restaurada');
+      toast.success('Turma e alunos restaurados');
       loadClasses(currentInstitution!.id);
     } catch (error) {
       console.error('Error restoring class:', error);
@@ -257,14 +319,11 @@ export default function TurmasPage() {
     try {
       const supabase = createClient();
 
-      // GOVERNANÇA: Verificar dependências antes de permitir exclusão permanente
       const [studentsRes, occurrencesRes] = await Promise.all([
-        // Contar alunos na turma (incluindo inativos)
         supabase
           .from('students')
           .select('id', { count: 'exact', head: true })
           .eq('class_id', classItem.id),
-        // Contar ocorrências históricas desta turma
         supabase
           .from('occurrences')
           .select('id', { count: 'exact', head: true })
@@ -275,20 +334,33 @@ export default function TurmasPage() {
       const studentsCount = studentsRes.count || 0;
       const occurrencesCount = occurrencesRes.count || 0;
 
-      // Bloquear exclusão se houver dados vinculados
-      if (studentsCount > 0 || occurrencesCount > 0) {
+      // Bloquear APENAS se houver ocorrências históricas
+      if (occurrencesCount > 0) {
         toast.error(
-          `Não é possível excluir permanentemente:\n` +
-          `• ${studentsCount} aluno(s) vinculado(s)\n` +
-          `• ${occurrencesCount} ocorrência(s) no histórico\n\n` +
-          `Mova os alunos para outra turma primeiro.`,
+          `Não é possível excluir permanentemente: ${occurrencesCount} ocorrência(s) no histórico.\n\nUse "Mover para a lixeira" para desativar preservando o histórico.`,
           { duration: 6000 }
         );
         return;
       }
 
-      // Se não há dependências, pedir confirmação
-      if (!confirm(`Excluir "${classItem.name}" permanentemente? Esta ação não pode ser desfeita.`)) return;
+      if (!confirm(`Excluir "${classItem.name}" permanentemente?${studentsCount > 0 ? ` Isso também excluirá ${studentsCount} aluno(s) sem ocorrências.` : ''} Esta ação não pode ser desfeita.`)) return;
+
+      // Se houver alunos sem ocorrências, excluir primeiro
+      if (studentsCount > 0) {
+        const { data: students } = await supabase
+          .from('students')
+          .select('id')
+          .eq('class_id', classItem.id);
+
+        if (students && students.length > 0) {
+          const { error: studentsError } = await supabase
+            .from('students')
+            .delete()
+            .eq('class_id', classItem.id);
+
+          if (studentsError) throw studentsError;
+        }
+      }
 
       const { error } = await supabase
         .from('classes')
@@ -619,6 +691,39 @@ export default function TurmasPage() {
           </ModalFooter>
         </div>
       </Modal>
+      {/* Modal de confirmação para mover turma + alunos para lixeira */}
+      {deleteConfirmModal.open && deleteConfirmModal.classItem && (
+        <Modal
+          isOpen={deleteConfirmModal.open}
+          onClose={() => setDeleteConfirmModal({ open: false, classItem: null, studentCount: 0 })}
+          title="Mover turma para a lixeira?"
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-gray-700">
+              A turma <strong>{deleteConfirmModal.classItem.name}</strong> possui{' '}
+              <strong>{deleteConfirmModal.studentCount} aluno(s)</strong>. Ao mover para a lixeira,
+              todos os alunos serão desativados automaticamente.
+            </p>
+            <div className="rounded-md bg-blue-50 border border-blue-200 p-3 text-sm text-blue-800">
+              O histórico de ocorrências será preservado. A turma e os alunos podem ser restaurados a qualquer momento.
+            </div>
+          </div>
+          <ModalFooter>
+            <button
+              onClick={() => setDeleteConfirmModal({ open: false, classItem: null, studentCount: 0 })}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => executeSoftDelete(deleteConfirmModal.classItem!)}
+              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700"
+            >
+              Mover para a lixeira
+            </button>
+          </ModalFooter>
+        </Modal>
+      )}
       {/* PDF Import Modal */}
       <PdfImportModal
         isOpen={showImportModal}

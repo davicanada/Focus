@@ -1,14 +1,14 @@
 {
   "active": [
     {
-      "slug": "filtro-severidade-ocorrencias",
-      "path": "plans/filtro-severidade-ocorrencias.md",
-      "title": "Filtro de Severidade nas Páginas de Ocorrências",
-      "summary": "Adicionar filtro de Severidade (Todas / Graves / Médias / Leves) com padrão **Graves**",
-      "linkedAt": "2026-03-09T04:13:37.609Z",
+      "slug": "cascade-soft-delete-turma-alunos",
+      "path": "plans/cascade-soft-delete-turma-alunos.md",
+      "title": "Soft Delete em Cascata ao Excluir Turma",
+      "summary": "Ao mover uma turma para a lixeira, soft-delete automático em todos os alunos da turma sem intervenção manual. Exclusão permanente bloqueada se qualquer aluno tiver ocorrências históricas. Restauração da turma também restaura os alunos automaticamente.",
+      "linkedAt": "2026-03-09T04:51:40.666Z",
       "status": "active"
     }
   ],
   "completed": [],
-  "primary": "filtro-severidade-ocorrencias"
+  "primary": "cascade-soft-delete-turma-alunos"
 }

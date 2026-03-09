@@ -1,46 +1,36 @@
 project:
-  name: "filtro-severidade-ocorrencias"
-  scale: SMALL
-  started: "2026-03-09T04:13:34.865Z"
+  name: "cascade-soft-delete-turma-alunos"
+  scale: MEDIUM
+  started: "2026-03-09T04:49:49.509Z"
   current_phase: V
 
 phases:
   P:
     status: filled
-    started_at: "2026-03-09T04:13:34.865Z"
-    completed_at: "2026-03-09T04:21:32.296Z"
+    started_at: "2026-03-09T04:49:49.509Z"
+    completed_at: "2026-03-09T04:54:14.482Z"
   R:
-    status: skipped
-    reason: "Not required for scale SMALL"
+    status: filled
+    started_at: "2026-03-09T04:54:14.486Z"
+    completed_at: "2026-03-09T04:54:19.454Z"
   E:
     status: filled
-    started_at: "2026-03-09T04:21:32.298Z"
-    completed_at: "2026-03-09T04:22:25.522Z"
+    started_at: "2026-03-09T04:54:19.458Z"
+    completed_at: "2026-03-09T05:00:22.778Z"
   V:
-    status: completed
-    started_at: "2026-03-09T04:22:25.525Z"
-    completed_at: "2026-03-09T04:22:55.753Z"
-    outputs:
-      - path: "app/admin/ocorrencias/page.tsx"
-        status: filled
-      - path: "app/viewer/ocorrencias/page.tsx"
-        status: filled
+    status: in_progress
+    started_at: "2026-03-09T05:00:22.784Z"
   C:
     status: skipped
-    reason: "Not required for scale SMALL"
+    reason: "Not required for scale MEDIUM"
 
 execution:
   history:
-    - timestamp: "2026-03-09T04:22:55.753Z"
+    - timestamp: "2026-03-09T05:00:22.784Z"
       phase: V
-      action: completed
-  last_activity: "2026-03-09T04:22:55.753Z"
-  resume_context: "Fase V (Validação) concluída"
-
-settings:
-  autonomous_mode: false
-  require_plan: true
-  require_approval: true
+      action: started
+  last_activity: "2026-03-09T05:00:22.784Z"
+  resume_context: "Fase V (Validação) em progresso"
 
 approval:
   plan_created: true
