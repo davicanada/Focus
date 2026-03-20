@@ -64,6 +64,8 @@ export default function ProfessoresPage() {
   const [roleChangeTarget, setRoleChangeTarget] = useState<TeacherWithUser | null>(null);
   const [newRole, setNewRole] = useState<string>('');
   const [changingRole, setChangingRole] = useState(false);
+  const [roleChangeError, setRoleChangeError] = useState<string>('');
+  const [adminCount, setAdminCount] = useState<number>(0);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -292,23 +294,29 @@ export default function ProfessoresPage() {
   const handleOpenRoleModal = (teacher: TeacherWithUser) => {
     setRoleChangeTarget(teacher);
     setNewRole(teacher.role);
+    setRoleChangeError('');
+    // Count active admins to warn about last admin
+    const activeAdmins = teachers.filter(t => t.role === 'admin' && t.is_active);
+    setAdminCount(activeAdmins.length);
     setShowRoleModal(true);
   };
 
   const handleCloseRoleModal = () => {
     setRoleChangeTarget(null);
     setNewRole('');
+    setRoleChangeError('');
     setShowRoleModal(false);
   };
 
   const handleRoleChange = async () => {
     if (!roleChangeTarget || !currentInstitution || !newRole) return;
     if (newRole === roleChangeTarget.role) {
-      toast.error('Selecione uma função diferente da atual');
+      setRoleChangeError('Selecione uma função diferente da atual');
       return;
     }
 
     setChangingRole(true);
+    setRoleChangeError('');
     try {
       const response = await fetch(`/api/users/${roleChangeTarget.user_id}/role`, {
         method: 'PUT',
@@ -323,13 +331,13 @@ export default function ProfessoresPage() {
       if (response.ok) {
         toast.success(result.message || 'Função alterada com sucesso!');
         handleCloseRoleModal();
-        loadTeachers(currentInstitution.id);
+        loadTeachers(currentInstitution.id, showInactive);
       } else {
-        toast.error(result.error || 'Erro ao alterar função');
+        setRoleChangeError(result.error || 'Erro ao alterar função');
       }
     } catch (error) {
       console.error('Error changing role:', error);
-      toast.error('Erro ao alterar função');
+      setRoleChangeError('Erro ao alterar função. Verifique sua conexão.');
     } finally {
       setChangingRole(false);
     }
@@ -676,7 +684,14 @@ export default function ProfessoresPage() {
             </Select>
           </div>
 
-          {roleChangeTarget?.role === 'admin' && newRole !== 'admin' && (
+          {roleChangeTarget?.role === 'admin' && newRole !== 'admin' && adminCount <= 1 && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-3 text-sm text-red-800">
+              <strong>Bloqueado:</strong> Esta é a única conta de Administrador da instituição.
+              Promova outro usuário para Administrador antes de alterar esta função.
+            </div>
+          )}
+
+          {roleChangeTarget?.role === 'admin' && newRole !== 'admin' && adminCount > 1 && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 text-sm text-yellow-800">
               <strong>Atenção:</strong> Ao remover a função de Administrador, este usuário
               perderá acesso às funcionalidades de gestão (turmas, alunos, tipos de ocorrência, etc.).
@@ -687,6 +702,12 @@ export default function ProfessoresPage() {
             <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800">
               <strong>Atenção:</strong> Ao promover para Administrador, este usuário terá
               acesso completo à gestão da instituição.
+            </div>
+          )}
+
+          {roleChangeError && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-3 text-sm text-red-800">
+              {roleChangeError}
             </div>
           )}
         </div>
@@ -701,7 +722,7 @@ export default function ProfessoresPage() {
           </Button>
           <Button
             onClick={handleRoleChange}
-            disabled={changingRole || newRole === roleChangeTarget?.role}
+            disabled={changingRole || newRole === roleChangeTarget?.role || (roleChangeTarget?.role === 'admin' && newRole !== 'admin' && adminCount <= 1)}
           >
             {changingRole ? (
               <>
