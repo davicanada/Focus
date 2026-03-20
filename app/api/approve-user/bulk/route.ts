@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { generateSlug } from '@/lib/utils';
 import { sendWelcomeEmail } from '@/lib/email/sendVerificationEmail';
+import { generateSecurePassword, reactivateUser, findInactiveUserInstitution, findActiveUserInstitution } from '@/lib/reactivate-user';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +10,7 @@ interface ApprovalResult {
   request_id: string;
   success: boolean;
   email?: string;
-  tempPassword?: string;
+  reactivated?: boolean;
   error?: string;
 }
 
@@ -107,63 +108,147 @@ export async function POST(request: NextRequest) {
           institutionId = newInstitution.id;
         }
 
-        // Gerar senha temporaria
-        const tempPassword = Math.random().toString(36).slice(-8) +
-                            Math.random().toString(36).slice(-8).toUpperCase();
-
-        // Criar usuario auth
-        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-          email: accessRequest.email,
-          password: tempPassword,
-          email_confirm: true,
-        });
-
-        if (authError) {
-          console.error('Error creating auth user:', authError);
-          results.push({
-            request_id: accessRequest.id,
-            success: false,
-            email: accessRequest.email,
-            error: 'Erro ao criar usuario de autenticacao',
-          });
-          continue;
-        }
-
-        // Criar usuario na tabela users
-        const { data: newUser, error: userError } = await supabase
-          .from('users')
-          .insert({
-            id: authData.user.id,
-            email: accessRequest.email,
-            full_name: accessRequest.full_name,
-            is_active: true,
-            is_master: false,
-          })
-          .select()
-          .single();
-
-        if (userError) {
-          console.error('Error creating user:', userError);
-          await supabase.auth.admin.deleteUser(authData.user.id);
-          results.push({
-            request_id: accessRequest.id,
-            success: false,
-            email: accessRequest.email,
-            error: 'Erro ao criar usuario',
-          });
-          continue;
-        }
-
-        // Criar vinculo user_institutions
         const role = accessRequest.request_type === 'professor'
           ? 'professor'
           : accessRequest.request_type === 'admin_viewer'
             ? 'admin_viewer'
             : 'admin';
+
+        // Check if user already exists
+        const { data: existingUser } = await supabase
+          .from('users')
+          .select('id, email, full_name')
+          .eq('email', accessRequest.email)
+          .single();
+
+        let userId: string;
+        let isNewUser = false;
+
+        if (existingUser) {
+          userId = existingUser.id;
+
+          // Check if already actively linked
+          const activeLink = await findActiveUserInstitution(supabase, {
+            userId: existingUser.id,
+            institutionId: institutionId!,
+          });
+
+          if (activeLink) {
+            // Already active — just update access request
+            await supabase.from('access_requests').update({
+              status: 'approved',
+              reviewed_by: reviewer_id,
+              reviewed_at: new Date().toISOString(),
+            }).eq('id', accessRequest.id);
+
+            results.push({
+              request_id: accessRequest.id,
+              success: true,
+              email: accessRequest.email,
+            });
+            continue;
+          }
+
+          // Check for inactive link — reactivate
+          const inactiveLink = await findInactiveUserInstitution(supabase, {
+            userId: existingUser.id,
+            institutionId: institutionId!,
+          });
+
+          if (inactiveLink) {
+            const result = await reactivateUser(supabase, {
+              userId: existingUser.id,
+              userInstitutionId: inactiveLink.id,
+              institutionId: institutionId!,
+              newRole: role,
+              reactivatedBy: reviewer_id,
+              userName: existingUser.full_name,
+              userEmail: existingUser.email,
+            });
+
+            await supabase.from('access_requests').update({
+              status: 'approved',
+              reviewed_by: reviewer_id,
+              reviewed_at: new Date().toISOString(),
+            }).eq('id', accessRequest.id);
+
+            results.push({
+              request_id: accessRequest.id,
+              success: result.success,
+              email: accessRequest.email,
+              reactivated: true,
+              error: result.error,
+            });
+            continue;
+          }
+
+          // User exists but no link — reactivate user record if needed
+          await supabase
+            .from('users')
+            .update({ is_active: true, deleted_at: null, deactivation_reason: null, updated_at: new Date().toISOString() })
+            .eq('id', userId)
+            .not('deleted_at', 'is', null);
+        } else {
+          // New user — create auth + users record
+          const tempPassword = generateSecurePassword();
+
+          const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+            email: accessRequest.email,
+            password: tempPassword,
+            email_confirm: true,
+          });
+
+          if (authError) {
+            console.error('Error creating auth user:', authError);
+            results.push({
+              request_id: accessRequest.id,
+              success: false,
+              email: accessRequest.email,
+              error: 'Erro ao criar usuario de autenticacao',
+            });
+            continue;
+          }
+
+          const { data: newUser, error: userError } = await supabase
+            .from('users')
+            .insert({
+              id: authData.user.id,
+              email: accessRequest.email,
+              full_name: accessRequest.full_name,
+              is_active: true,
+              is_master: false,
+            })
+            .select()
+            .single();
+
+          if (userError) {
+            console.error('Error creating user:', userError);
+            await supabase.auth.admin.deleteUser(authData.user.id);
+            results.push({
+              request_id: accessRequest.id,
+              success: false,
+              email: accessRequest.email,
+              error: 'Erro ao criar usuario',
+            });
+            continue;
+          }
+
+          userId = newUser.id;
+          isNewUser = true;
+
+          // Send welcome email for new users
+          try {
+            await sendWelcomeEmail(accessRequest.email, accessRequest.full_name, tempPassword);
+          } catch (emailError) {
+            console.error('Error sending welcome email:', emailError);
+          }
+        }
+
+        // Create user_institutions link (for existing user without link, or new user)
         const { error: relationError } = await supabase
           .from('user_institutions')
           .insert({
-            user_id: newUser.id,
+            user_id: userId,
             institution_id: institutionId,
             role,
             is_active: true,
@@ -171,8 +256,10 @@ export async function POST(request: NextRequest) {
 
         if (relationError) {
           console.error('Error creating user-institution relation:', relationError);
-          await supabase.from('users').delete().eq('id', newUser.id);
-          await supabase.auth.admin.deleteUser(authData.user.id);
+          if (isNewUser) {
+            await supabase.from('users').delete().eq('id', userId);
+            await supabase.auth.admin.deleteUser(userId);
+          }
           results.push({
             request_id: accessRequest.id,
             success: false,
@@ -182,7 +269,7 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        // Atualizar status da solicitacao
+        // Update access request status
         await supabase
           .from('access_requests')
           .update({
@@ -192,22 +279,10 @@ export async function POST(request: NextRequest) {
           })
           .eq('id', accessRequest.id);
 
-        // Enviar email de boas-vindas
-        try {
-          await sendWelcomeEmail(
-            accessRequest.email,
-            accessRequest.full_name,
-            tempPassword
-          );
-        } catch (emailError) {
-          console.error('Error sending welcome email:', emailError);
-        }
-
         results.push({
           request_id: accessRequest.id,
           success: true,
           email: accessRequest.email,
-          tempPassword,
         });
 
       } catch (error) {

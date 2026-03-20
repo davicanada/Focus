@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { generateSlug } from '@/lib/utils';
 import { sendWelcomeEmail } from '@/lib/email/sendVerificationEmail';
+import { generateSecurePassword, reactivateUser, findInactiveUserInstitution, findActiveUserInstitution } from '@/lib/reactivate-user';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,10 +120,70 @@ export async function POST(request: NextRequest) {
     let tempPassword: string | null = null;
 
     if (existingUser) {
-      // User already exists — just create a new institution link
       userId = existingUser.id;
 
-      // Reactivate user if previously deactivated
+      // Check if already actively linked to this institution
+      const activeLink = await findActiveUserInstitution(supabase, {
+        userId: existingUser.id,
+        institutionId: institutionId!,
+      });
+
+      if (activeLink) {
+        // Already active — just update the access request status and return
+        await supabase.from('access_requests').update({
+          status: 'approved',
+          reviewed_by: reviewer_id,
+          reviewed_at: new Date().toISOString(),
+        }).eq('id', request_id);
+
+        return NextResponse.json({
+          success: true,
+          action: 'approved',
+          userId,
+          isExistingUser: true,
+          message: 'Usuário já estava vinculado a esta instituição',
+        });
+      }
+
+      // Check if there's an inactive (soft-deleted) link — reactivate it
+      const inactiveLink = await findInactiveUserInstitution(supabase, {
+        userId: existingUser.id,
+        institutionId: institutionId!,
+      });
+
+      if (inactiveLink) {
+        const result = await reactivateUser(supabase, {
+          userId: existingUser.id,
+          userInstitutionId: inactiveLink.id,
+          institutionId: institutionId!,
+          newRole: role,
+          reactivatedBy: reviewer_id,
+          userName: existingUser.full_name,
+          userEmail: existingUser.email,
+        });
+
+        if (!result.success) {
+          return NextResponse.json({ error: result.error }, { status: 500 });
+        }
+
+        // Update access request status
+        await supabase.from('access_requests').update({
+          status: 'approved',
+          reviewed_by: reviewer_id,
+          reviewed_at: new Date().toISOString(),
+        }).eq('id', request_id);
+
+        return NextResponse.json({
+          success: true,
+          action: 'approved',
+          userId,
+          isExistingUser: true,
+          reactivated: true,
+          message: 'Usuário reativado com sucesso. Email de boas-vindas enviado.',
+        });
+      }
+
+      // User exists but no link to this institution — reactivate user record if needed
       await supabase
         .from('users')
         .update({ is_active: true, deleted_at: null, deactivation_reason: null, updated_at: new Date().toISOString() })
@@ -130,7 +191,7 @@ export async function POST(request: NextRequest) {
         .not('deleted_at', 'is', null);
     } else {
       // New user — create auth + users record
-      tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8).toUpperCase();
+      tempPassword = generateSecurePassword();
 
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: accessRequest.email,
@@ -226,7 +287,6 @@ export async function POST(request: NextRequest) {
       action: 'approved',
       userId,
       isExistingUser: !!existingUser,
-      tempPassword,
     });
   } catch (error) {
     console.error('Error in approve user:', error);

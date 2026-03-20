@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { sendWelcomeEmail } from '@/lib/email/sendVerificationEmail';
+import { generateSecurePassword, reactivateUser, findInactiveUserInstitution, findActiveUserInstitution } from '@/lib/reactivate-user';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,13 +58,20 @@ export async function GET(request: NextRequest) {
 // POST - Criar novo usuário
 export async function POST(request: NextRequest) {
   try {
-    const { full_name, email, institution_id, role } = await request.json();
+    const { full_name, email, institution_id, role, reactivate } = await request.json();
     const validRoles = ['admin', 'professor', 'admin_viewer'];
     const userRole = validRoles.includes(role) ? role : 'professor';
 
     // Validar dados
     if (!full_name || !email || !institution_id) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
+    }
+
+    // Verificar autenticação
+    const supabase = await createClient();
+    const { data: { user: caller }, error: authError } = await supabase.auth.getUser();
+    if (authError || !caller) {
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
     }
 
     const supabaseAdmin = createServiceClient();
@@ -79,22 +87,63 @@ export async function POST(request: NextRequest) {
     let tempPassword: string | null = null;
 
     if (existingUser) {
-      // User exists — check if already linked to this institution
-      const { data: existingLink } = await supabaseAdmin
-        .from('user_institutions')
-        .select('id')
-        .eq('user_id', existingUser.id)
-        .eq('institution_id', institution_id)
-        .is('deleted_at', null)
-        .single();
+      // User exists — check if already linked (active) to this institution
+      const activeLink = await findActiveUserInstitution(supabaseAdmin, {
+        userId: existingUser.id,
+        institutionId: institution_id,
+      });
 
-      if (existingLink) {
+      if (activeLink) {
         return NextResponse.json({ error: 'Usuário já está vinculado a esta instituição' }, { status: 409 });
+      }
+
+      // Check if there's an inactive (soft-deleted) link
+      const inactiveLink = await findInactiveUserInstitution(supabaseAdmin, {
+        userId: existingUser.id,
+        institutionId: institution_id,
+      });
+
+      if (inactiveLink) {
+        // If reactivate flag not sent, return inactive_found for frontend to show modal
+        if (!reactivate) {
+          return NextResponse.json({
+            status: 'inactive_found',
+            user: {
+              id: existingUser.id,
+              full_name: full_name,
+              email: email,
+              old_role: inactiveLink.role,
+              deactivated_at: inactiveLink.deleted_at,
+            },
+          });
+        }
+
+        // Admin confirmed reactivation
+        const result = await reactivateUser(supabaseAdmin, {
+          userId: existingUser.id,
+          userInstitutionId: inactiveLink.id,
+          institutionId: institution_id,
+          newRole: userRole,
+          reactivatedBy: caller.id,
+          userName: full_name,
+          userEmail: email.toLowerCase(),
+        });
+
+        if (!result.success) {
+          return NextResponse.json({ error: result.error }, { status: 500 });
+        }
+
+        return NextResponse.json({
+          success: true,
+          userId: existingUser.id,
+          reactivated: true,
+          message: 'Usuário reativado com sucesso. Email de boas-vindas enviado.',
+        });
       }
 
       userId = existingUser.id;
 
-      // Reactivate user if previously deactivated
+      // Reactivate user record if previously deactivated (but no institution link existed)
       await supabaseAdmin
         .from('users')
         .update({ is_active: true, deleted_at: null, deactivation_reason: null, updated_at: new Date().toISOString() })
@@ -102,8 +151,7 @@ export async function POST(request: NextRequest) {
         .not('deleted_at', 'is', null);
     } else {
       // New user — create auth + users record
-      tempPassword = Math.random().toString(36).slice(-8) +
-                           Math.random().toString(36).slice(-8).toUpperCase();
+      tempPassword = generateSecurePassword();
 
       const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email: email.toLowerCase(),

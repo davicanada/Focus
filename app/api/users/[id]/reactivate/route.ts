@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { reactivateUser } from '@/lib/reactivate-user';
 
 export const dynamic = 'force-dynamic';
 
@@ -98,42 +99,60 @@ export async function PUT(
     const institutionToReactivate = targetInstitutionId || userInstitution?.institution_id;
 
     if (institutionToReactivate) {
-      // Verificar se existe vínculo antigo com essa instituição
-      const { data: existingLink } = await serviceClient
+      // Step 1: Check for ACTIVE link first
+      const { data: activeLink } = await serviceClient
         .from('user_institutions')
         .select('id, role')
         .eq('user_id', userId)
         .eq('institution_id', institutionToReactivate)
+        .is('deleted_at', null)
         .single();
 
-      if (existingLink) {
-        // Reativar vínculo existente
-        const { error: linkError } = await serviceClient
+      if (!activeLink) {
+        // Step 2: Check for SOFT-DELETED link
+        const { data: inactiveLink } = await serviceClient
           .from('user_institutions')
-          .update({
-            is_active: true,
-            deleted_at: null
-          })
-          .eq('id', existingLink.id);
+          .select('id, role')
+          .eq('user_id', userId)
+          .eq('institution_id', institutionToReactivate)
+          .not('deleted_at', 'is', null)
+          .order('deleted_at', { ascending: false })
+          .limit(1)
+          .single();
 
-        if (linkError) {
-          console.error('Erro ao reativar vínculo:', linkError);
-        }
-      } else {
-        // Criar novo vínculo como professor (role padrão para reativação)
-        const { error: createError } = await serviceClient
-          .from('user_institutions')
-          .insert({
-            user_id: userId,
-            institution_id: institutionToReactivate,
-            role: 'professor',
-            is_active: true
+        if (inactiveLink) {
+          // Reactivate via shared utility (resets password + sends email)
+          const newRole = body.role || inactiveLink.role;
+          const result = await reactivateUser(serviceClient, {
+            userId,
+            userInstitutionId: inactiveLink.id,
+            institutionId: institutionToReactivate,
+            newRole,
+            reactivatedBy: user.id,
+            userName: targetUser.full_name,
+            userEmail: targetUser.email,
           });
 
-        if (createError) {
-          console.error('Erro ao criar vínculo:', createError);
+          if (!result.success) {
+            return NextResponse.json({ error: result.error }, { status: 500 });
+          }
+        } else {
+          // Step 3: No link at all — create new as professor
+          const { error: createError } = await serviceClient
+            .from('user_institutions')
+            .insert({
+              user_id: userId,
+              institution_id: institutionToReactivate,
+              role: body.role || 'professor',
+              is_active: true,
+            });
+
+          if (createError) {
+            console.error('Erro ao criar vínculo:', createError);
+          }
         }
       }
+      // If activeLink exists, user is already linked — no action needed on user_institutions
     }
 
     return NextResponse.json({
@@ -142,12 +161,12 @@ export async function PUT(
       user: {
         id: targetUser.id,
         full_name: targetUser.full_name,
-        email: targetUser.email
+        email: targetUser.email,
       },
       previous_deactivation: {
         deleted_at: targetUser.deleted_at,
-        reason: targetUser.deactivation_reason
-      }
+        reason: targetUser.deactivation_reason,
+      },
     });
 
   } catch (error) {
