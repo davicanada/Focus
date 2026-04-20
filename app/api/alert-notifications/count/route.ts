@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       .from('user_institutions')
       .select('institution_id, role')
       .eq('user_id', user.id)
-      .eq('role', 'admin')
+      .in('role', ['admin', 'admin_viewer'])
       .eq('is_active', true)
       .single();
 
